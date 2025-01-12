@@ -1,6 +1,12 @@
 # Project Title: ML 24/25-01 Investigate Image Reconstruction by using Classifiers
 
-## Problem Statement:
+## Table of Contents
+- [Problem Statement](#problem-statement)
+- [Introduction](#introduction)
+- [Image Encoder](#image-encoder)
+- [Sparse Distributed Representations (SDR)](#sparse-distributed-representations-sdr)
+
+### Problem Statement:
 This project aims to explore the role of classifiers in Hierarchical Temporal Memory (HTM) systems,
 focusing on their ability to associate input patterns with meaningful predictions and reconstruct
 original inputs from Sparse Distributed Representations (SDRs). By investigating and comparing two
@@ -13,7 +19,7 @@ similarity measures. Results will be illustrated with diagrams, analysed quantit
 providing insights into the reconstruction capabilities of classifiers in HTM systems and their
 practical implications.
 
-## Introduction:
+### Introduction:
 This project aims to explore the role of classifiers in Hierarchical Temporal Memory (HTM) systems,
 focusing on their ability to associate input patterns with meaningful predictions and reconstruct
 original inputs from Sparse Distributed Representations (SDRs). By investigating and comparing two
@@ -26,7 +32,7 @@ similarity measures. Results will be illustrated with diagrams, analysed quantit
 providing insights into the reconstruction capabilities of classifiers in HTM systems and their
 practical implications.
 
-## Image Encoder:
+### Image Encoder:
 The ImageEncoder plays a crucial role in preparing image data for processing within Hierarchical
 Temporal Memory (HTM) systems by converting raw image inputs into binary representations
 compatible with HTM&#39;s Sparse Distributed Representations (SDRs). Based on the ImageBinarizer
@@ -37,7 +43,7 @@ HTM systems. By preprocessing images into this sparse binary format, the ImageEn
 gap between raw image data and the HTM&#39;s Spatial Pooler, making it a foundational component for
 image-based experiments, such as learning spatial patterns or regenerating inputs from SDRs.
 
-## Sparse Distributed Representations (SDR):
+### Sparse Distributed Representations (SDR):
 Sparse Distributed Representations (SDRs) are analogous to how the human brain encodes
 information. Just as neurons in the brain fire in sparse patterns, with only a small fraction of neurons
 active at any time, SDRs use binary vectors where a small percentage of bits are active (1s) while the
