@@ -1,6 +1,4 @@
-﻿using Daenet.Binarizer.ExtensionMethod;
-using SkiaSharp;
-using System;
+﻿using SkiaSharp;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;

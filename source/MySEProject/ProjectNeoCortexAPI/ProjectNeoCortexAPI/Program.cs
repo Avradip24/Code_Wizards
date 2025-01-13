@@ -1,5 +1,4 @@
 ﻿using Daenet.Binarizer.Entities;
-using Daenet.Binarizer;
 
 namespace ProjectNeoCortexAPI
 {
@@ -20,8 +19,19 @@ namespace ProjectNeoCortexAPI
         }
         public static void Run()
         {
-            
+            Console.WriteLine("Create the image binary with custom width and height and save it to a text file.");
 
+            //Taking the Input Image and adding the Image Binarizer Parameters
+            var config = new BinarizerParams
+            {
+                InputImagePath = "CommonFiles\\IMG.jpeg",
+                OutputImagePath = ".\\BinarizedImage.txt",
+                ImageWidth = 200,
+                ImageHeight = 120
+            };
+
+            var img = new CustomImageBinarizer(config);
+            img.Run();
         }
     }
 }
