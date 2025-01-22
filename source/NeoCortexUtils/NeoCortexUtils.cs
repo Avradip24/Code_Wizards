@@ -21,8 +21,9 @@ namespace NeoCortex
         /// Binarize image to the file with the test name.
         /// </summary>
         /// <param name="mnistImage"></param>
-        /// <param name="imageSize"></param>
-        /// <param name="testName"></param>
+        /// <param name="imageHeight"></param>
+        /// <param name="imageWidth"></param>
+        /// <param name="outputPath"></param>
         /// <returns></returns>
         public static string BinarizeImage(string mnistImage, int imageHeight, int imageWidth, string outputPath)
         {

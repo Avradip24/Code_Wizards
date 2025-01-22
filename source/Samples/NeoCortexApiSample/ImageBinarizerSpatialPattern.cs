@@ -66,29 +66,42 @@ namespace NeoCortexApiSample
         /// <returns>The trained bersion of the SP.</returns>
         private SpatialPooler RunExperiment(HtmConfig cfg, string inputPrefix)
         {
-
             var mem = new Connections(cfg);
 
             bool isInStableState = false;
 
             int numColumns = 20 * 40;
-            //Accessing the Image Folder form the Cureent Directory
+            int imageHeight = 20;
+            int imageWidth = 40;
+            // Accessing the Image Folder from the Current Directory
             string trainingFolder = "Sample\\TestFiles";
-            //Accessing the Image Folder form the Cureent Directory Foldfer
+            // Accessing the Image Folder from the Current Directory Folder
             var trainingImages = Directory.EnumerateFiles(trainingFolder).Where(file => file.StartsWith($"{trainingFolder}\\{inputPrefix}") &&
-            (file.EndsWith(".jpeg") || file.EndsWith(".jpg") || file.EndsWith(".png"))).ToArray();
-            //Image Size
-            //int imageSize = 28;
+                (file.EndsWith(".jpeg") || file.EndsWith(".jpg") || file.EndsWith(".png"))).ToArray();
+
             // Path to the folder where results will be saved
-            String outputFolder = ".\\BinarizedImages";
+            string outputFolder = ".\\BinarizedImages";
             // Ensure the output folder exists
             Directory.CreateDirectory(outputFolder);
-            ////Folder Name in the Directorty 
-            //string testName = "test_image";
 
-            HomeostaticPlasticityController hpa = new HomeostaticPlasticityController(mem, trainingImages.Length * 50, (isStable, numPatterns, actColAvg, seenInputs) =>
+            // Pre-binarize all images
+            List<string> binarizedImagePaths = new List<string>();
+
+            foreach (var image in trainingImages)
             {
-                // Event should only be fired when entering the stable state.
+                // Construct the output file name based on the input file name
+                string outputFileName = Path.GetFileNameWithoutExtension(image) + "_Binarized.txt";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                // Binarize the images before taking inputs for the SP
+                string binarizedImagePath = NeoCortexUtils.BinarizeImage(image, imageHeight, imageWidth, outputPath);
+                binarizedImagePaths.Add(binarizedImagePath);
+            }
+
+            Debug.WriteLine("All images binarized successfully.");
+
+            HomeostaticPlasticityController hpa = new HomeostaticPlasticityController(mem, binarizedImagePaths.Count * 50, (isStable, numPatterns, actColAvg, seenInputs) =>
+            {
                 if (isStable)
                 {
                     isInStableState = true;
@@ -99,51 +112,35 @@ namespace NeoCortexApiSample
                     isInStableState = false;
                     Debug.WriteLine($"INSTABLE STATE");
                 }
-                // Ideal SP should never enter unstable state after stable state.
-                Debug.WriteLine($"Entered STABLE state: Patterns: {numPatterns}, Inputs: {seenInputs}, iteration: {seenInputs / numPatterns}");
             }, requiredSimilarityThreshold: 0.975);
 
-            // It creates the instance of Spatial Pooler Multithreaded version.
+            // Create the instance of Spatial Pooler
             SpatialPooler sp = new SpatialPooler(hpa);
 
-            //Initializing the Spatial Pooler Algorithm
+            // Initialize the Spatial Pooler Algorithm
             sp.Init(mem, new DistributedMemory() { ColumnDictionary = new InMemoryDistributedDictionary<int, NeoCortexApi.Entities.Column>(1) });
 
-            //Image Size
-            //int imgSize = 28;
-            int imageHeight = 20;
-            int imageWidth = 40;
             int[] activeArray = new int[numColumns];
 
             int numStableCycles = 0;
-            // Runnig the Traning Cycle for 5 times
-            int maxCycles = 5;
+            int maxCycles = 100;
             int currentCycle = 0;
 
+            // Main cycle loop
             while (!isInStableState && currentCycle < maxCycles)
             {
-                foreach (var Image in trainingImages)
+                foreach (var binarizedImagePath in binarizedImagePaths)
                 {
-                    // Construct the output file name based on the input file name
-                    string outputFileName = Path.GetFileNameWithoutExtension(Image) + "_Binarized.txt";
-                    string outputPath = Path.Combine(outputFolder, outputFileName);
-                    //Binarizing the Images before taking Inputs for the Sp
-                    string inputBinaryImageFile = NeoCortexUtils.BinarizeImage($"{Image}",imageHeight,imageWidth, outputPath);
- 
-                    // Read Binarized and Encoded input csv file into array
-                    int[] inputVector = NeoCortexUtils.ReadCsvIntegers(inputBinaryImageFile).ToArray();
-
-                    int[] oldArray = new int[activeArray.Length];
-                    List<double[,]> overlapArrays = new List<double[,]>();
-                    List<double[,]> bostArrays = new List<double[,]>();
+                    // Read binarized and encoded input CSV file into array
+                    int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
 
                     sp.compute(inputVector, activeArray, true);
-                    //Getting the Active Columns
+                    // Get active columns
                     var activeCols = ArrayUtils.IndexWhere(activeArray, (el) => el == 1);
 
-                    Debug.WriteLine($"'Cycle: {currentCycle} - Image-Input: {Image}'");
+                    Debug.WriteLine($"Cycle: {currentCycle} - Binarized Image Input: {binarizedImagePath}");
                     Debug.WriteLine($"INPUT :{Helpers.StringifyVector(inputVector)}");
-                    Debug.WriteLine($"SDR:{Helpers.StringifyVector(activeCols)}\n");
+                    Debug.WriteLine($"SDR: {Helpers.StringifyVector(activeCols)}\n");
                 }
 
                 currentCycle++;
@@ -152,7 +149,6 @@ namespace NeoCortexApiSample
                 if (currentCycle >= maxCycles)
                     break;
 
-                // Increment numStableCycles only when it's in a stable state
                 if (isInStableState)
                     numStableCycles++;
             }
