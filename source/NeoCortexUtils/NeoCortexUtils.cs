@@ -24,21 +24,36 @@ namespace NeoCortex
         /// <param name="imageSize"></param>
         /// <param name="testName"></param>
         /// <returns></returns>
-        public static string BinarizeImage(string mnistImage, int imageSize, string testName)
+        public static string BinarizeImage(string mnistImage, int imageHeight, int imageWidth, string outputPath)
         {
             string binaryImage;
 
-            binaryImage = $"{testName}.txt";
+            // Use the provided outputPath as the full path for the binarized file
+            binaryImage = outputPath;
 
+            // If the file already exists, delete it to avoid conflicts
             if (File.Exists(binaryImage))
                 File.Delete(binaryImage);
 
-            ImageBinarizer imageBinarizer = new ImageBinarizer(new BinarizerParams { RedThreshold = 200, GreenThreshold = 200, BlueThreshold = 200, ImageWidth = imageSize, ImageHeight = imageSize, InputImagePath = mnistImage, OutputImagePath = binaryImage });
+            // Initialize the ImageBinarizer with the specified parameters
+            ImageBinarizer imageBinarizer = new ImageBinarizer(new BinarizerParams
+            {
+                RedThreshold = 200,
+                GreenThreshold = 200,
+                BlueThreshold = 200,
+                ImageWidth = imageWidth,
+                ImageHeight = imageHeight,
+                InputImagePath = mnistImage,
+                OutputImagePath = binaryImage // Save the binarized image at the specified output path
+            });
 
+            // Run the binarization process
             imageBinarizer.Run();
 
+            // Return the path to the binarized image file
             return binaryImage;
         }
+
 
         /// <summary>
         /// Draws the bitmap from array of active columns.
