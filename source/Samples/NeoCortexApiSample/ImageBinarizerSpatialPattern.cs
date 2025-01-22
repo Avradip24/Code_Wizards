@@ -25,24 +25,25 @@ namespace NeoCortexApiSample
             double minOctOverlapCycles = 1.0;
             double maxBoost = 5.0;
             // We will build a slice of the cortex with the given number of mini-columns
-            int numColumns = 64 * 64;
+            int numColumns = 20 * 40;
             // The Size of the Image Height and width is 28 pixel
-            int imageSize = 28;
-            var colDims = new int[] { 64, 64 };
+            int imageHeight = 20; //updated Height
+            int imageWidth = 40; // updated width
+            var colDims = new int[] { 20, 40 };
 
             // This is a set of configuration parameters used in the experiment.
-            HtmConfig cfg = new HtmConfig(new int[] { imageSize, imageSize }, new int[] { numColumns })
+            HtmConfig cfg = new HtmConfig(new int[] { imageHeight, imageWidth }, new int[] { numColumns })
             {
                 CellsPerColumn = 10,
-                InputDimensions = new int[] { imageSize, imageSize },
-                NumInputs = imageSize * imageSize,
+                InputDimensions = new int[] { imageHeight, imageWidth },
+                NumInputs = imageHeight * imageWidth,
                 ColumnDimensions = colDims,
                 MaxBoost = maxBoost,
                 DutyCyclePeriod = 100,
                 MinPctOverlapDutyCycles = minOctOverlapCycles,
                 GlobalInhibition = false,
                 NumActiveColumnsPerInhArea = 0.02 * numColumns,
-                PotentialRadius = (int)(0.15 * imageSize * imageSize),
+                PotentialRadius = (int)(0.15 * imageHeight * imageWidth),
                 LocalAreaDensity = -1,
                 ActivationThreshold = 10,
                 MaxSynapsesPerSegment = (int)(0.01 * numColumns),
@@ -70,14 +71,14 @@ namespace NeoCortexApiSample
 
             bool isInStableState = false;
 
-            int numColumns = 64 * 64;
+            int numColumns = 20 * 40;
             //Accessing the Image Folder form the Cureent Directory
             string trainingFolder = "Sample\\TestFiles";
             //Accessing the Image Folder form the Cureent Directory Foldfer
             var trainingImages = Directory.EnumerateFiles(trainingFolder).Where(file => file.StartsWith($"{trainingFolder}\\{inputPrefix}") &&
             (file.EndsWith(".jpeg") || file.EndsWith(".jpg") || file.EndsWith(".png"))).ToArray();
             //Image Size
-            int imageSize = 28;
+            //int imageSize = 28;
             // Path to the folder where results will be saved
             String outputFolder = ".\\BinarizedImages";
             // Ensure the output folder exists
@@ -109,7 +110,9 @@ namespace NeoCortexApiSample
             sp.Init(mem, new DistributedMemory() { ColumnDictionary = new InMemoryDistributedDictionary<int, NeoCortexApi.Entities.Column>(1) });
 
             //Image Size
-            int imgSize = 28;
+            //int imgSize = 28;
+            int imageHeight = 20;
+            int imageWidth = 40;
             int[] activeArray = new int[numColumns];
 
             int numStableCycles = 0;
@@ -125,7 +128,7 @@ namespace NeoCortexApiSample
                     string outputFileName = Path.GetFileNameWithoutExtension(Image) + "_Binarized.txt";
                     string outputPath = Path.Combine(outputFolder, outputFileName);
                     //Binarizing the Images before taking Inputs for the Sp
-                    string inputBinaryImageFile = NeoCortexUtils.BinarizeImage($"{Image}", imgSize, outputPath);
+                    string inputBinaryImageFile = NeoCortexUtils.BinarizeImage($"{Image}",imageHeight,imageWidth, outputPath);
  
                     // Read Binarized and Encoded input csv file into array
                     int[] inputVector = NeoCortexUtils.ReadCsvIntegers(inputBinaryImageFile).ToArray();
@@ -169,11 +172,13 @@ namespace NeoCortexApiSample
             // Get all image files matching the specified prefix
             var trainingImages = Directory.GetFiles(trainingFolder, $"{inputPrefix}*.png");
             // Size of the images
-            int imgSize = 28;
+            // int imgSize = 28;
+            int imageHeight = 20;
+            int imageWidth = 40;
             // Name for the test image
             string testName = "test_image";
             // Array to hold active columns
-            int[] activeArray = new int[64 * 64];
+            int[] activeArray = new int[20 * 40];
             // List to store heatmap data
             List<List<double>> heatmapData = new List<List<double>>();
             // Initialize a list to get normalized permanence values.
@@ -184,7 +189,7 @@ namespace NeoCortexApiSample
             List<double[]> similarityList = new List<double[]>();
             foreach (var Image in trainingImages)
             {
-                string inputBinaryImageFile = NeoCortexUtils.BinarizeImage($"{Image}", imgSize, testName);
+                string inputBinaryImageFile = NeoCortexUtils.BinarizeImage($"{Image}", imageHeight, imageWidth, testName);
 
                 // Read input csv file into array
                 int[] inputVector = NeoCortexUtils.ReadCsvIntegers(inputBinaryImageFile).ToArray();
