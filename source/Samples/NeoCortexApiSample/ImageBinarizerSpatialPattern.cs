@@ -75,18 +75,20 @@ namespace NeoCortexApiSample
             bool isInStableState = false;
             int numColumns = 64 * 64;
 
-            //Accessing the Image Folder form the Cureent Directory
+            // Accessing the Image Folder from the Current Directory
             string trainingFolder = "Sample\\TestFiles";
-            //Accessing the Image Folder form the Cureent Directory Folder
-            var actualImages = Directory.EnumerateFiles(trainingFolder).Where(file => file.StartsWith($"{trainingFolder}\\{inputPrefix}") &&
-            (file.EndsWith(".jpeg") || file.EndsWith(".jpg") || file.EndsWith(".png"))).ToArray();
+            // Accessing the Image Folder from the Current Directory Folder
+            var actualImages = Directory.EnumerateFiles(trainingFolder)
+                .Where(file => file.StartsWith($"{trainingFolder}\\{inputPrefix}") &&
+                              (file.EndsWith(".jpeg") || file.EndsWith(".jpg") || file.EndsWith(".png")))
+                .ToArray();
 
-            //Image Size
+            // Image Size
             int imgHeight = 30;
             int imgWidth = 60;
 
             // Path to the folder where results will be saved
-            String outputFolder = ".\\BinarizedImages";
+            string outputFolder = ".\\BinarizedImages";
             // Delete the folder if it exists
             if (Directory.Exists(outputFolder))
             {
@@ -99,7 +101,7 @@ namespace NeoCortexApiSample
             Dictionary<string, Cell[]> actualImagesSDRs = new Dictionary<string, Cell[]>();
             Dictionary<string, string> binarizedToActualMap = new Dictionary<string, string>();
 
-            // Taking all the binarized image path in a list
+            // Taking all the binarized image paths in a list
             var binarizedImagePaths = new List<string>();
             foreach (var actualImage in actualImages)
             {
@@ -112,11 +114,11 @@ namespace NeoCortexApiSample
                 // Binarizing the images
                 string binarizedImagePath = BinarizeImage(imgWidth, imgHeight, outputPath, actualImage);
                 binarizedImagePaths.Add(binarizedImagePath);
-                //Store mapping from binarized to actual
+
+                // Store mapping from binarized to actual
                 binarizedToActualMap[outputFileName] = actualImageKey;
             }
             Debug.WriteLine("All images are binarized and mapped to actual images");
-
 
             HomeostaticPlasticityController hpa = new HomeostaticPlasticityController(mem, actualImages.Length * 50, (isStable, numPatterns, actColAvg, seenInputs) =>
             {
@@ -138,11 +140,12 @@ namespace NeoCortexApiSample
             // It creates the instance of Spatial Pooler.
             SpatialPooler sp = new SpatialPooler(hpa);
 
-            //Initializing the Spatial Pooler Algorithm
+            // Initializing the Spatial Pooler Algorithm
             sp.Init(mem, new DistributedMemory() { ColumnDictionary = new InMemoryDistributedDictionary<int, NeoCortexApi.Entities.Column>(1) });
-            //It creates the instance of HTMClassifier
+
+            // It creates the instance of HTMClassifier
             HtmClassifier<string, ComputeCycle> imageClassifier = new HtmClassifier<string, ComputeCycle>();
-            //It creates the instance of KNNClassifier
+            // It creates the instance of KNNClassifier
             var knnClassifier = new KNeighborsClassifier<string, ComputeCycle>();
 
             int[] activeArray = new int[numColumns];
@@ -151,10 +154,12 @@ namespace NeoCortexApiSample
             int maxCycles = 200;
             int currentCycle = 0;
 
+            // Dictionary to store original and reconstructed SDRs for similarity calculation
+            Dictionary<string, int[]> sdrDictionary = new Dictionary<string, int[]>();
+
             // ===========================
             //       SPATIAL POOLER PHASE
             // ===========================
-
             while (currentCycle < maxCycles)
             {
                 foreach (var binarizedImagePath in binarizedImagePaths)
@@ -169,27 +174,29 @@ namespace NeoCortexApiSample
                     var cells = activeCols.Select(index => new Cell(index, 0, cfg.CellsPerColumn, new CellActivity())).ToArray();
 
                     string binarizedKey = Path.GetFileNameWithoutExtension(binarizedImagePath);
+                    string actualImageKey = binarizedToActualMap[binarizedKey];
 
                     // Store SDR representation mapped to the actual image for later training
-                    string actualImageKey = binarizedToActualMap[binarizedKey];
                     actualImagesSDRs[actualImageKey] = cells;
+
+                    // Store the original SDR for similarity calculation
+                    sdrDictionary[actualImageKey] = activeCols;
 
                     Debug.WriteLine($"Cycle: {currentCycle} - Image-Input: {actualImageKey}");
                     Debug.WriteLine($"INPUT :{Helpers.StringifyVector(inputVector)}");
                     Debug.WriteLine($"SDR: {Helpers.StringifyVector(activeCols)}\n");
-
                 }
 
-            Debug.WriteLine($"Completed Cycle * {currentCycle} * Stability: {isInStableState}\n");
-            currentCycle++;
-            //Check if the desired number of cycles is reached
-            if (currentCycle >= maxCycles) break;
+                Debug.WriteLine($"Completed Cycle * {currentCycle} * Stability: {isInStableState}\n");
+                currentCycle++;
 
-            // Increment numStableCycles only when it's in a stable state
-            if (isInStableState) numStableCycles++;
+                // Check if the desired number of cycles is reached
+                if (currentCycle >= maxCycles) break;
 
-            if (numStableCycles > 5) break;
+                // Increment numStableCycles only when it's in a stable state
+                if (isInStableState) numStableCycles++;
 
+                if (numStableCycles > 5) break;
             }
 
             Debug.WriteLine("It has reached the stable stage\n");
@@ -220,39 +227,44 @@ namespace NeoCortexApiSample
             foreach (var binarizedImagePath in binarizedImagePaths)
             {
                 int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
-                sp.compute(inputVector, activeArray, false);  // false prevents SP from updating
+                sp.compute(inputVector, activeArray, false); // false prevents SP from updating
 
                 var activeCols = ArrayUtils.IndexWhere(activeArray, (el) => el == 1);
                 var cells = activeCols.Select(index => new Cell(index, 0, cfg.CellsPerColumn, new CellActivity())).ToArray();
                 string binarizedKey = Path.GetFileNameWithoutExtension(binarizedImagePath);
                 string actualImageKey = binarizedToActualMap[binarizedKey];
 
-                // Get top 3 predicted images by htm classifier
-                var predictedImages = imageClassifier.GetPredictedInputValues(cells, 3);
+                // Calculate similarity between original and reconstructed SDR
+                double similarity = MathHelpers.CalcArraySimilarity(sdrDictionary[actualImageKey], activeCols);
+                Debug.WriteLine($"Similarity between original and reconstructed SDR for {actualImageKey}: {similarity}%");
 
-                Debug.WriteLine($"Actual Image: {actualImageKey}");
+                // Get top 3 predicted images by HTM classifier
+                var predictedImages = imageClassifier.GetPredictedInputValues(cells, 3);
                 foreach (var prediction in predictedImages)
                 {
                     Debug.WriteLine($"Predicted Image by HTM Classifier: {prediction.PredictedInput} - Similarity: {prediction.Similarity}");
                 }
-                // Get predicted images by knn classfier
-                var knnPredictions = knnClassifier.GetPredictedInputValues(cells, 3);
 
+                var knnPredictions = knnClassifier.GetPredictedInputValues(cells, 3);
                 foreach (var prediction in knnPredictions)
                 {
                     Debug.WriteLine($"Predicted Image by KNN Classifier: {prediction.PredictedInput} - Similarity: {Math.Round(prediction.Similarity, 2)}");
                 }
             }
+
             Debug.WriteLine("Prediction Phase Completed.\n");
 
             // ===========================
             //    RESET CLASSIFIER
             // ===========================
-            Debug.WriteLine("Resetting  both the Classifiers for Next Experiment...");
+            Debug.WriteLine("Resetting both the Classifiers for Next Experiment...");
             imageClassifier.ClearState();
             knnClassifier.ClearState();
+
             return sp;
         }
+
+
         /// <summary>
         /// Runs the restructuring experiment using the provided spatial pooler. 
         /// This method iterates through a set of training images, computes spatial pooling, 
