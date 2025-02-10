@@ -22,8 +22,8 @@ namespace NeoCortexApiSample
             string binaryImage = $"{destinationPath}.txt";
 
             // Delete existing file if it exists
-            if (File.Exists(binaryImage))
-                File.Delete(binaryImage);
+            if (File.Exists(binaryImage)) File.Delete(binaryImage);
+
 
             // Initialize and run the binarizer
             ImageBinarizer imageBinarizer = new ImageBinarizer(new BinarizerParams
