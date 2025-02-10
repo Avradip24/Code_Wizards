@@ -29,11 +29,11 @@ namespace NeoCortexApiSample
             double minOctOverlapCycles = 1.0;
             double maxBoost = 5.0;
             // We will build a slice of the cortex with the given number of mini-columns
-            int numColumns = 64 * 64;
+            int numColumns = 128 * 128;
             // The Size of the Image Height and width is 28 pixel
             //int imageSize = 25;
-            int imgHeight = 30;
-            int imgWidth = 60;
+            int imgHeight = 32;
+            int imgWidth = 32;
             var colDims = new int[] { 64, 64 };
 
             // This is a set of configuration parameters used in the experiment.
@@ -82,16 +82,14 @@ namespace NeoCortexApiSample
             (file.EndsWith(".jpeg") || file.EndsWith(".jpg") || file.EndsWith(".png"))).ToArray();
 
             //Image Size
-            int imgHeight = 30;
-            int imgWidth = 60;
+            int imgHeight = 32;
+            int imgWidth = 32;
 
             // Path to the folder where results will be saved
             String outputFolder = ".\\BinarizedImages";
             // Delete the folder if it exists
-            if (Directory.Exists(outputFolder))
-            {
-                Directory.Delete(outputFolder, true); // This will delete the folder and all its contents
-            }
+            if (Directory.Exists(outputFolder)) Directory.Delete(outputFolder, true);
+
             // Recreate the folder
             Directory.CreateDirectory(outputFolder);
 
@@ -141,14 +139,14 @@ namespace NeoCortexApiSample
             //Initializing the Spatial Pooler Algorithm
             sp.Init(mem, new DistributedMemory() { ColumnDictionary = new InMemoryDistributedDictionary<int, NeoCortexApi.Entities.Column>(1) });
             //It creates the instance of HTMClassifier
-            HtmClassifier<string, ComputeCycle> imageClassifier = new HtmClassifier<string, ComputeCycle>();
+            HtmClassifier<string, ComputeCycle> htmClassifier = new HtmClassifier<string, ComputeCycle>();
             //It creates the instance of KNNClassifier
             var knnClassifier = new KNeighborsClassifier<string, ComputeCycle>();
 
             int[] activeArray = new int[numColumns];
 
             int numStableCycles = 0;
-            int maxCycles = 200;
+            int maxCycles = 500;
             int currentCycle = 0;
 
             // ===========================
@@ -166,7 +164,7 @@ namespace NeoCortexApiSample
 
                     // Getting the Active Columns
                     var activeCols = ArrayUtils.IndexWhere(activeArray, (el) => el == 1);
-                    var cells = activeCols.Select(index => new Cell(index, 0, cfg.CellsPerColumn, new CellActivity())).ToArray();
+                    var cells = activeCols.Select(index => new Cell { Index = index }).ToArray();
 
                     string binarizedKey = Path.GetFileNameWithoutExtension(binarizedImagePath);
 
@@ -204,7 +202,7 @@ namespace NeoCortexApiSample
                 string actualImageKey = entry.Key;
                 Cell[] cells = entry.Value;
 
-                imageClassifier.Learn(actualImageKey, cells);
+                htmClassifier.Learn(actualImageKey, cells);
                 Debug.WriteLine($"Trained HTM Classifier on Image: {actualImageKey}");
                 knnClassifier.Learn(actualImageKey, cells);
                 Debug.WriteLine($"Trained KNN Classifier on Image: {actualImageKey}");
@@ -235,12 +233,12 @@ namespace NeoCortexApiSample
                 sp.compute(inputVector, activeArray, false);  // false prevents SP from updating
 
                 var activeCols = ArrayUtils.IndexWhere(activeArray, (el) => el == 1);
-                var cells = activeCols.Select(index => new Cell(index, 0, cfg.CellsPerColumn, new CellActivity())).ToArray();
+                var cells = activeCols.Select(index => new Cell { Index = index }).ToArray();
                 string binarizedKey = Path.GetFileNameWithoutExtension(binarizedImagePath);
                 string actualImageKey = binarizedToActualMap[binarizedKey];
 
                 // Get predicted image by htm classifier
-                var predictedImagesHTM = imageClassifier.GetPredictedInputValues(cells, 1);
+                var predictedImagesHTM = htmClassifier.GetPredictedInputValues(cells, 1);
 
                 // Get top predicted image SDRs from KNN Classifier
                 var predictedImagesKNN = knnClassifier.GetPredictedInputValues(cells, 1);
@@ -276,7 +274,7 @@ namespace NeoCortexApiSample
             //    RESET CLASSIFIER
             // ===========================
             Debug.WriteLine("Resetting  both the Classifiers for Next Experiment...");
-            imageClassifier.ClearState();
+            htmClassifier.ClearState();
             knnClassifier.ClearState();
             return sp;
         }
@@ -295,8 +293,8 @@ namespace NeoCortexApiSample
             var trainingImages = Directory.GetFiles(trainingFolder, $"{inputPrefix}*.png");
             // Size of the images
             //int imgSize = 25;
-            int imgHeight = 30;
-            int imgWidth = 60;
+            int imgHeight = 32;
+            int imgWidth = 32;
             // Name for the test image
             string testName = "test_image";
             // Array to hold active columns
