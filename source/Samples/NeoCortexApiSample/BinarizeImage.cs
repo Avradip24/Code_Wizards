@@ -38,8 +38,11 @@ namespace NeoCortexApiSample
             });
 
             imageBinarizer.Run();
-
-            return binaryImage;
+            //Inverting the binarized images 
+            var binaryData = File.ReadAllLines(binaryImage).Select(line => new string(line.Select(ch => ch == '0' ? '1' : '0').ToArray())).ToArray();
+            File.WriteAllLines(binaryImage, binaryData);
+            return binaryImage; 
+            
         }
     }
 }
