@@ -110,7 +110,7 @@ namespace NeoCortexApiSample
                 string outputPath = Path.Combine(outputFolder, outputFileName);
 
                 // Binarizing the images
-                string binarizedImagePath = BinarizeImage(imgWidth, imgHeight, outputPath, actualImage);
+                string binarizedImagePath = ImageBinarizationUtils.BinarizeImages(imgWidth, imgHeight, outputPath, actualImage);
                 binarizedImagePaths.Add(binarizedImagePath);
                 //Store mapping from binarized to actual
                 binarizedToActualMap[outputFileName] = actualImageKey;
@@ -312,7 +312,7 @@ namespace NeoCortexApiSample
             foreach (var Image in trainingImages)
             {
                 //string inputBinaryImageFile = NeoCortexUtils.BinarizeImage($"{Image}", imgSize, testName);
-                string binaryImagePath = BinarizeImage(imgWidth, imgHeight, testName, Image);
+                string binaryImagePath = ImageBinarizationUtils.BinarizeImages(imgWidth, imgHeight, testName, Image);
 
                 // Read input csv file into array
                 int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binaryImagePath).ToArray();
@@ -463,22 +463,6 @@ namespace NeoCortexApiSample
             Debug.WriteLine($"Combined similarity plot generated and saved successfully.");
 
         }
-        private static string BinarizeImage(int imageWidth, int imageHeight, string destinationPath, string imagePath)
-        {
-            string binaryImage;
-
-            binaryImage = $"{destinationPath}.txt";
-
-            if (File.Exists(binaryImage))
-                File.Delete(binaryImage);
-
-            ImageBinarizer imageBinarizer = new ImageBinarizer(new BinarizerParams { RedThreshold = 200, GreenThreshold = 200, BlueThreshold = 200, ImageWidth = imageWidth, ImageHeight = imageHeight, InputImagePath = imagePath, OutputImagePath = binaryImage });
-
-            imageBinarizer.Run();
-
-            return binaryImage;
-        }
-
-
+        
     }
 }
