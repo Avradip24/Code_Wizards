@@ -180,15 +180,15 @@ namespace NeoCortexApiSample
 
                 }
 
-            Debug.WriteLine($"Completed Cycle * {currentCycle} * Stability: {isInStableState}\n");
-            currentCycle++;
-            //Check if the desired number of cycles is reached
-            if (currentCycle >= maxCycles) break;
+                Debug.WriteLine($"Completed Cycle * {currentCycle} * Stability: {isInStableState}\n");
+                currentCycle++;
+                //Check if the desired number of cycles is reached
+                if (currentCycle >= maxCycles) break;
 
-            // Increment numStableCycles only when it's in a stable state
-            if (isInStableState) numStableCycles++;
+                // Increment numStableCycles only when it's in a stable state
+                if (isInStableState) numStableCycles++;
 
-            if (numStableCycles > 5) break;
+                if (numStableCycles > 5) break;
 
             }
 
@@ -226,7 +226,8 @@ namespace NeoCortexApiSample
             if (Directory.Exists(outputReconstructedKNNFolder)) Directory.Delete(outputReconstructedKNNFolder, true);
             // Recreate the folder
             Directory.CreateDirectory(outputReconstructedKNNFolder);
-
+            // Instantiate the ImageReconstructor with required dimensions
+            ImageReconstructor reconstructor = new ImageReconstructor(imgWidth, imgHeight);
 
             foreach (var binarizedImagePath in binarizedImagePaths)
             {
@@ -253,10 +254,8 @@ namespace NeoCortexApiSample
                     var bestPrediction = predictedImagesHTM.OrderByDescending(p => p.Similarity).First();
 
                     Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPrediction.PredictedInput} - Similarity: {bestPrediction.Similarity}%\nSDR: [{string.Join(",", bestPrediction.SDR)}]\n");
-                    var outputFileName = $"Reconstructed_HTM_{bestPrediction.PredictedInput}.txt";
-                    string outputHtmFolder = Path.Combine(outputReconstructedHTMFolder, outputFileName);
                     // Reconstruct the image based on predicted SDR
-                    GenerateBinarizedImageAsText(bestPrediction.SDR, imgWidth, imgHeight, outputHtmFolder);
+                    reconstructor.SaveReconstructedImage(bestPrediction.SDR, outputReconstructedHTMFolder, "Reconstructed_HTM", bestPrediction.PredictedInput);
 
                 }
                 else
@@ -265,11 +264,9 @@ namespace NeoCortexApiSample
                 }
                 foreach (var prediction in predictedImagesKNN)
                 {
-                    Debug.WriteLine($"Predicted Image by KNN Classifier: {prediction.PredictedInput} - Similarity: {Math.Round(prediction.Similarity, 2 )* 100}%\nSDR: [{string.Join(",", prediction.SDR)}]\n");
-                    var outputFileName = $"Reconstructed_KNN_{prediction.PredictedInput}.txt";
-                    string outputKnnFolder = Path.Combine(outputReconstructedKNNFolder, outputFileName);
+                    Debug.WriteLine($"Predicted Image by KNN Classifier: {prediction.PredictedInput} - Similarity: {Math.Round(prediction.Similarity, 2) * 100}%\nSDR: [{string.Join(",", prediction.SDR)}]\n");
                     // Reconstruct the image based on predicted SDR
-                    GenerateBinarizedImageAsText(prediction.SDR, imgWidth, imgHeight, outputKnnFolder);
+                    reconstructor.SaveReconstructedImage(prediction.SDR, outputReconstructedKNNFolder, "Reconstructed_KNN", prediction.PredictedInput);
                 }
             }
             Debug.WriteLine("Prediction Phase Completed.\n");
@@ -283,41 +280,7 @@ namespace NeoCortexApiSample
             knnClassifier.ClearState();
             return sp;
         }
-        static void GenerateBinarizedImageAsText(int[] SDR, int imgWidth, int imgHeight, string filePath)
-        {
-            // Create a 2D array filled with '0's
-            char[,] binarizedImage = new char[imgHeight, imgWidth];
-            for (int i = 0; i < imgHeight; i++)
-                for (int j = 0; j < imgWidth; j++)
-                    binarizedImage[i, j] = '0';
 
-            int maxSDRIndex = SDR.Max();  // Find the maximum SDR index
-            int maxGridIndex = imgWidth * imgHeight - 1; // Maximum allowed index for 30x60 grid
-
-            foreach (int index in SDR)
-            {
-                // Scale the SDR index to fit within the grid
-                int scaledIndex = (int)((double)index / maxSDRIndex * maxGridIndex);
-
-                int row = scaledIndex / imgWidth;
-                int col = scaledIndex % imgWidth;
-
-                binarizedImage[row, col] = '1';
-            }
-
-            // Write to text file
-            using (StreamWriter writer = new StreamWriter(filePath))
-            {
-                for (int i = 0; i < imgHeight; i++)
-                {
-                    for (int j = 0; j < imgWidth; j++)
-                    {
-                        writer.Write(binarizedImage[i, j]);
-                    }
-                    writer.WriteLine(); // Newline for next row
-                }
-            }
-        }
         /// <summary>
         /// Runs the restructuring experiment using the provided spatial pooler. 
         /// This method iterates through a set of training images, computes spatial pooling, 
