@@ -31,13 +31,7 @@ namespace NeoCortexApi.Classifiers
         /// The similarity between the SDR of  predicted cell set with the SDR of the input.
         /// </summary>
         public double Similarity { get; set; }
-
-        /// <summary>
-        /// The SDR of the predicted cell.
-        /// </summary>
-        public int[] SDR { get; set; }
     }
-
 
     /// <summary>
     /// Classifier implementation which memorize all seen values.
@@ -203,7 +197,7 @@ namespace NeoCortexApi.Classifiers
                     {
                         Debug.WriteLine($">indx:{n.ToString("D3")}\tinp/len: {pair.Key}/{cellIndicies.Length}, Same Bits = {cellIndicies.Length.ToString("D3")}\t, Similarity 100.00 %\t {Helpers.StringifyVector(cellIndicies)}");
 
-                        res.Add(new ClassifierResult<TIN> { PredictedInput = pair.Key, Similarity = (float)100.0, NumOfSameBits = cellIndicies.Length, SDR = cellIndicies });
+                        res.Add(new ClassifierResult<TIN> { PredictedInput = pair.Key, Similarity = (float)100.0, NumOfSameBits = cellIndicies.Length});
                     }
                     else
                     {
@@ -214,7 +208,7 @@ namespace NeoCortexApi.Classifiers
                         int[] bestMatch;
                         var numOfSameBitsPct = GetBestMatch(pair.Key, cellIndicies, out similarity, out bestMatch);// pair.Value.Intersect(cellIndicies).Count();
                         //double simPercentage = Math.Round(MathHelpers.CalcArraySimilarity(pair.Value, cellIndicies), 2);
-                        dict.Add(pair.Key, new ClassifierResult<TIN> { PredictedInput = pair.Key, NumOfSameBits = numOfSameBitsPct, Similarity = similarity, SDR = bestMatch });
+                        dict.Add(pair.Key, new ClassifierResult<TIN> { PredictedInput = pair.Key, NumOfSameBits = numOfSameBitsPct, Similarity = similarity});
                         predictedList.Add(new KeyValuePair<double, string>(similarity, pair.Key.ToString()));
 
                         if (numOfSameBitsPct > maxSameBits)
