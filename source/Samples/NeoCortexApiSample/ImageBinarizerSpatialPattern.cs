@@ -262,7 +262,7 @@ namespace NeoCortexApiSample
                     // Get the highest similarity prediction
                     var bestPrediction = predictedImagesHTM.OrderByDescending(p => p.Similarity).First();
 
-                    Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPrediction.PredictedInput} - Similarity: {bestPrediction.Similarity}%\nSDR: [{string.Join(",", bestPrediction.SDR)}]\n");
+                    Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPrediction.PredictedInput} - Similarity: {bestPrediction.Similarity}%");
                     int[] reconstructedHTM = htmClassifier.ReconstructInput(predictedImagesHTM);
 
                     reconstructor.SaveReconstructedImage(reconstructedHTM, outputReconstructedHTMFolder, "Reconstructed_HTM", bestPrediction.PredictedInput);
@@ -270,7 +270,7 @@ namespace NeoCortexApiSample
                 
                 foreach (var prediction in predictedImagesKNN)
                 {
-                    Debug.WriteLine($"Predicted Image by KNN Classifier: {prediction.PredictedInput} - Similarity: {Math.Round(prediction.Similarity, 2) * 100}%\nSDR: [{string.Join(",", prediction.SDR)}]\n");
+                    Debug.WriteLine($"Predicted Image by KNN Classifier: {prediction.PredictedInput} - Similarity: {Math.Round(prediction.Similarity, 2) * 100}%");
                     int[] reconstructedKNN = knnClassifier.ReconstructInput(predictedImagesKNN);
                     reconstructor.SaveReconstructedImage(reconstructedKNN, outputReconstructedKNNFolder, "Reconstructed_KNN", prediction.PredictedInput);
                 }
