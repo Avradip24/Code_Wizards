@@ -23,7 +23,6 @@ namespace NeoCortexApiSample
             {
                 PredictedInput = p.PredictedInput,
                 Similarity = p.Similarity,
-                SDR = p.SDR
             }).ToList();
         }
 
