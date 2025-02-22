@@ -1,5 +1,8 @@
-﻿using System;
+﻿using NeoCortexApi.Entities;
+using NeoCortexApi;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,52 +21,49 @@ namespace NeoCortexApiSample
             this.imgHeight = imgHeight;
         }
 
-        public void SaveReconstructedImage(int[] SDR, string outputFolder, string prefix, string predictedLabel)
+        public void ReconstructAndSave(SpatialPooler sp, Cell[] predictedCells, string outputFolder, string fileName, int[] inputVector)
         {
-            if (!Directory.Exists(outputFolder))
+            var predictedCols = predictedCells.Select(c => c.Index).Distinct().ToArray();
+            // Create a new dictionary to store extended probabilities
+            Dictionary<int, double> reconstructedPermanence = sp.Reconstruct(predictedCols);
+            int maxInput = inputVector.Length;
+
+            // Iterate through all possible inputs and adding them to the dictionary
+            Dictionary<int, double> allPermanenceDictionary = reconstructedPermanence.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            // Assigning the inactive columns Permanence 0
+            for (int inputIndex = 0; inputIndex < maxInput; inputIndex++)
             {
-                Directory.CreateDirectory(outputFolder);
-            }
-
-            string outputFileName = $"{prefix}_{predictedLabel}.txt";
-            string filePath = Path.Combine(outputFolder, outputFileName);
-
-            GenerateBinarizedImageAsText(SDR, filePath);
-        }
-
-        private void GenerateBinarizedImageAsText(int[] SDR, string filePath)
-        {
-            // Create a 2D array filled with '0's
-            char[,] binarizedImage = new char[imgHeight, imgWidth];
-
-            for (int i = 0; i < imgHeight; i++)
-                for (int j = 0; j < imgWidth; j++)
-                    binarizedImage[i, j] = '0';
-
-            // Directly map SDR indices to grid positions
-            foreach (int index in SDR)
-            {
-                if (index >= 0 && index < imgWidth * imgHeight) // Ensure index is within bounds
+                if (!allPermanenceDictionary.ContainsKey(inputIndex))
                 {
-                    int row = index / imgWidth;  // Calculate row position
-                    int col = index % imgWidth;  // Calculate column position
-
-                    binarizedImage[row, col] = '1';  // Mark active cells as '1'
+                    allPermanenceDictionary[inputIndex] = 0.0;
                 }
             }
 
-            // Write to text file
-            using (StreamWriter writer = new StreamWriter(filePath))
+            // Sort the dictionary by keys
+            var sortedAllPermanenceDictionary = allPermanenceDictionary.OrderBy(kvp => kvp.Key);
+            // Convert the sorted dictionary of all permanences to a list
+            List<double> permanenceValuesList = sortedAllPermanenceDictionary.Select(kvp => kvp.Value).ToList();
+            // Normalizing Permanence Threshold
+            List<int> normalizePermanenceList = Helpers.ThresholdingProbabilities(permanenceValuesList, 30.5);
+            // Remove "_Binarized" from the filename if present
+               fileName = fileName.Replace("_Binarized", "");
+            // Define the output text file name
+            string reconstructedTxtPath = Path.Combine(outputFolder, fileName);
+
+            // Convert the 1D list into a 2D binary-like structure
+            using (StreamWriter writer = new StreamWriter(reconstructedTxtPath))
             {
                 for (int i = 0; i < imgHeight; i++)
                 {
-                    for (int j = 0; j < imgWidth; j++)
-                    {
-                        writer.Write(binarizedImage[i, j]);
-                    }
-                    writer.WriteLine(); // Newline for next row
+                    // Extract a row of binary values from the flattened list
+                    var row = normalizePermanenceList.Skip(i * imgWidth).Take(imgWidth);
+                    // Convert row to a string and write to the file
+                    writer.WriteLine(string.Join("", row));
                 }
             }
+
+            Debug.WriteLine($"Reconstructed Image Saved: {reconstructedTxtPath}");
         }
     }
 }
