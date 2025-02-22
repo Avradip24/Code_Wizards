@@ -267,8 +267,9 @@ namespace NeoCortexApiSample
 
                     if (actualImagesSDRs.TryGetValue(bestPredictionHTM.PredictedInput, out Cell[] predictedHTMCells))
                     {
-                        ReconstructAndSave(predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{fileNameOnly}.txt", inputVector);
+                        reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{fileNameOnly}.txt", inputVector);
                     }
+                
                 }
 
                 if (predictedImagesKNN.Count > 0)
@@ -279,52 +280,11 @@ namespace NeoCortexApiSample
 
                     if (actualImagesSDRs.TryGetValue(bestPredictionKNN.PredictedInput, out Cell[] predictedKNNCells))
                     {
-                        ReconstructAndSave(predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{fileNameOnly}.txt", inputVector);
+                        reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{fileNameOnly}.txt", inputVector);
                     }
                 }
 
-                // Function to perform reconstruction and save the result
-                void ReconstructAndSave(Cell[] predictedCells, string outputFolder,string fileName, int[] inputVector)
-                {
-                    var predictedCols = predictedCells.Select(c => c.Index).Distinct().ToArray();
-                    // Create a new dictionary to store extended probabilities
-                    Dictionary<int, double> reconstructedPermanence = sp.Reconstruct(predictedCols);
-                    int maxInput = inputVector.Length;
-                    // Iterate through all possible inputs and adding them to the dictionary
-                    Dictionary<int, double> allPermanenceDictionary = reconstructedPermanence.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
-                    //Assinginig the inactive columns Permanence 0
-                    for (int inputIndex = 0; inputIndex < maxInput; inputIndex++)
-                    {
-                        if (!allPermanenceDictionary.ContainsKey(inputIndex))
-                        {
-                            allPermanenceDictionary[inputIndex] = 0.0;
-                        }
-                    }
-
-                    // Sort the dictionary by keys
-                    var sortedAllPermanenceDictionary = allPermanenceDictionary.OrderBy(kvp => kvp.Key);
-                    // Convert the sorted dictionary of allpermanences to a list
-                    List<double> permanenceValuesList = sortedAllPermanenceDictionary.Select(kvp => kvp.Value).ToList();
-                    //Normalizing Permanence Threshold
-                    List<int> normalizePermanenceList = Helpers.ThresholdingProbabilities(permanenceValuesList, 30.5);
-                    // Define the output text file name
-                    string reconstructedTxtPath = Path.Combine(outputFolder, fileName);
-
-                    // Convert the 1D list into a 2D binary-like structure
-                    using (StreamWriter writer = new StreamWriter(reconstructedTxtPath))
-                    {
-                        for (int i = 0; i < imgHeight; i++)
-                        {
-                            // Extract a row of binary values from the flattened list
-                            var row = normalizePermanenceList.Skip(i * imgWidth).Take(imgWidth);
-                            // Convert row to a string and write to the file
-                            writer.WriteLine(string.Join("", row));
-                        }
-                    }
-
-                    Debug.WriteLine($"Reconstructed Image Saved: {reconstructedTxtPath}");
-                }
+                
             }
             Debug.WriteLine("Prediction Phase Completed.\n");
             Debug.WriteLine($"Binary SDR images reconstructed and saved");
