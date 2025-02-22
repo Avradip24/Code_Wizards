@@ -239,12 +239,6 @@ namespace NeoCortexApiSample
             // Instantiate the ImageReconstructor with required dimensions
             ImageReconstructor reconstructor = new ImageReconstructor(imgWidth, imgHeight);
 
-            List<int[]> reconstructedImages = new List<int[]>();
-            String outputFolderRec = ".\\Reconstructed_Images";
-            if (Directory.Exists(outputFolderRec)) Directory.Delete(outputFolderRec, true);
-            // Recreate the folder
-            Directory.CreateDirectory(outputFolderRec);
-
             foreach (var binarizedImagePath in binarizedImagePaths)
             {
                 int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
@@ -262,74 +256,75 @@ namespace NeoCortexApiSample
                 // Get top predicted image SDRs from KNN Classifier
                 var predictedImagesKNN = knnClassifier.GetPredictedInputValues(cells, 1);
 
+                string fileNameOnly = Path.GetFileNameWithoutExtension(binarizedImagePath);
+
                 // Process HTM Classifier Predictions
                 if (predictedImagesHTM.Count > 0)
                 {
                     // Get the highest similarity prediction
-                    var bestPrediction = predictedImagesHTM.OrderByDescending(p => p.Similarity).First();
+                    var bestPredictionHTM = predictedImagesHTM.OrderByDescending(p => p.Similarity).First();
+                    Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput} - Similarity: {bestPredictionHTM.Similarity}%");
 
-                    Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPrediction.PredictedInput} - Similarity: {bestPrediction.Similarity}%");
-                }
-                
-                foreach (var prediction in predictedImagesKNN)
-                {
-                    Debug.WriteLine($"Predicted Image by KNN Classifier: {prediction.PredictedInput} - Similarity: {Math.Round(prediction.Similarity, 2) * 100}%");
-                }
-
-                Dictionary<int, double> reconstructedPermanence = sp.Reconstruct(activeCols);
-                int maxInput = inputVector.Length;
-
-                // Create a new dictionary to store extended probabilities
-                Dictionary<int, double> allPermanenceDictionary = new Dictionary<int, double>();
-                // Iterate through all possible inputs using a foreach loop
-                foreach (var kvp in reconstructedPermanence)
-                {
-                    int inputIndex = kvp.Key;
-                    double probability = kvp.Value;
-
-                    // Use the existing probability
-                    allPermanenceDictionary[inputIndex] = probability;
-                }
-
-                //Assinginig the inactive columns Permanence 0
-                for (int inputIndex = 0; inputIndex < maxInput; inputIndex++)
-                {
-                    if (!reconstructedPermanence.ContainsKey(inputIndex))
+                    if (actualImagesSDRs.TryGetValue(bestPredictionHTM.PredictedInput, out Cell[] predictedHTMCells))
                     {
-                        // Key doesn't exist, set the probability to 0
-                        allPermanenceDictionary[inputIndex] = 0.0;
+                        ReconstructAndSave(predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{fileNameOnly}.txt", inputVector);
                     }
                 }
 
-                // Sort the dictionary by keys
-                var sortedAllPermanenceDictionary = allPermanenceDictionary.OrderBy(kvp => kvp.Key);
-                // Convert the sorted dictionary of allpermanences to a list
-                List<double> permanenceValuesList = sortedAllPermanenceDictionary.Select(kvp => kvp.Value).ToList();
-                //Normalizing Permanence Threshold
-                var ThresholdValue = 30.5;
-
-                //Normalize permanences(0 and 1) based on the threshold value and convert them to a list of integers.
-                List<int> normalizePermanenceList = Helpers.ThresholdingProbabilities(permanenceValuesList, ThresholdValue);
-
-                // Define the output text file path
-                string fileNameOnly = Path.GetFileNameWithoutExtension(binarizedImagePath);
-                string reconstructedTxtPath = Path.Combine(outputFolderRec, $"reconstructed_{fileNameOnly}.txt");
-
-                // Convert the 1D list into a 2D binary-like structure
-                using (StreamWriter writer = new StreamWriter(reconstructedTxtPath))
+                if (predictedImagesKNN.Count > 0)
                 {
-                    for (int i = 0; i < imgHeight; i++)
-                    {
-                        // Extract a row of binary values from the flattened list
-                        var row = normalizePermanenceList.Skip(i * imgWidth).Take(imgWidth);
+                    // Get the highest similarity prediction
+                    var bestPredictionKNN = predictedImagesKNN.OrderByDescending(p => p.Similarity).First();
+                    Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput} - Similarity: {Math.Round(bestPredictionKNN.Similarity, 2) * 100}%");
 
-                        // Convert row to a string and write to the file
-                        writer.WriteLine(string.Join("", row));
+                    if (actualImagesSDRs.TryGetValue(bestPredictionKNN.PredictedInput, out Cell[] predictedKNNCells))
+                    {
+                        ReconstructAndSave(predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{fileNameOnly}.txt", inputVector);
                     }
                 }
 
-                Debug.WriteLine($"Reconstructed binary SDR saved: {reconstructedTxtPath}");
+                // Function to perform reconstruction and save the result
+                void ReconstructAndSave(Cell[] predictedCells, string outputFolder,string fileName, int[] inputVector)
+                {
+                    var predictedCols = predictedCells.Select(c => c.Index).Distinct().ToArray();
+                    // Create a new dictionary to store extended probabilities
+                    Dictionary<int, double> reconstructedPermanence = sp.Reconstruct(predictedCols);
+                    int maxInput = inputVector.Length;
+                    // Iterate through all possible inputs and adding them to the dictionary
+                    Dictionary<int, double> allPermanenceDictionary = reconstructedPermanence.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
+                    //Assinginig the inactive columns Permanence 0
+                    for (int inputIndex = 0; inputIndex < maxInput; inputIndex++)
+                    {
+                        if (!allPermanenceDictionary.ContainsKey(inputIndex))
+                        {
+                            allPermanenceDictionary[inputIndex] = 0.0;
+                        }
+                    }
+
+                    // Sort the dictionary by keys
+                    var sortedAllPermanenceDictionary = allPermanenceDictionary.OrderBy(kvp => kvp.Key);
+                    // Convert the sorted dictionary of allpermanences to a list
+                    List<double> permanenceValuesList = sortedAllPermanenceDictionary.Select(kvp => kvp.Value).ToList();
+                    //Normalizing Permanence Threshold
+                    List<int> normalizePermanenceList = Helpers.ThresholdingProbabilities(permanenceValuesList, 30.5);
+                    // Define the output text file name
+                    string reconstructedTxtPath = Path.Combine(outputFolder, fileName);
+
+                    // Convert the 1D list into a 2D binary-like structure
+                    using (StreamWriter writer = new StreamWriter(reconstructedTxtPath))
+                    {
+                        for (int i = 0; i < imgHeight; i++)
+                        {
+                            // Extract a row of binary values from the flattened list
+                            var row = normalizePermanenceList.Skip(i * imgWidth).Take(imgWidth);
+                            // Convert row to a string and write to the file
+                            writer.WriteLine(string.Join("", row));
+                        }
+                    }
+
+                    Debug.WriteLine($"Reconstructed Image Saved: {reconstructedTxtPath}");
+                }
             }
             Debug.WriteLine("Prediction Phase Completed.\n");
             Debug.WriteLine($"Binary SDR images reconstructed and saved");
