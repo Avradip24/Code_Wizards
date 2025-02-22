@@ -40,7 +40,7 @@ namespace NeoCortexApiSample
             double minOctOverlapCycles = 1.0;
             double maxBoost = 5.0;
             // We will build a slice of the cortex with the given number of mini-columns
-            int numColumns = 128 * 128;
+            int numColumns = 64 * 64;
             // The Size of the Image Height and width is 28 pixel
             //int imageSize = 25;
             int imgHeight = 64;
@@ -239,22 +239,28 @@ namespace NeoCortexApiSample
             // Instantiate the ImageReconstructor with required dimensions
             ImageReconstructor reconstructor = new ImageReconstructor(imgWidth, imgHeight);
 
+            List<int[]> reconstructedImages = new List<int[]>();
+            String outputFolderRec = ".\\Reconstructed_Images";
+            if (Directory.Exists(outputFolderRec)) Directory.Delete(outputFolderRec, true);
+            // Recreate the folder
+            Directory.CreateDirectory(outputFolderRec);
+
             foreach (var binarizedImagePath in binarizedImagePaths)
             {
                 int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
+
+                Array.Clear(activeArray, 0, activeArray.Length);
+
                 sp.compute(inputVector, activeArray, false);  // false prevents SP from updating
 
                 var activeCols = ArrayUtils.IndexWhere(activeArray, (el) => el == 1);
                 var cells = activeCols.Select(index => new Cell { Index = index }).ToArray();
-               ;
-
+               
                 // Get predicted image by htm classifier
                 var predictedImagesHTM = htmClassifier.GetPredictedInputValues(cells, 1);
 
                 // Get top predicted image SDRs from KNN Classifier
                 var predictedImagesKNN = knnClassifier.GetPredictedInputValues(cells, 1);
-
-
 
                 // Process HTM Classifier Predictions
                 if (predictedImagesHTM.Count > 0)
@@ -263,17 +269,67 @@ namespace NeoCortexApiSample
                     var bestPrediction = predictedImagesHTM.OrderByDescending(p => p.Similarity).First();
 
                     Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPrediction.PredictedInput} - Similarity: {bestPrediction.Similarity}%");
-                    int[] reconstructedHTM = htmClassifier.ReconstructInput(predictedImagesHTM);
-
-                    reconstructor.SaveReconstructedImage(reconstructedHTM, outputReconstructedHTMFolder, "Reconstructed_HTM", bestPrediction.PredictedInput);
                 }
                 
                 foreach (var prediction in predictedImagesKNN)
                 {
                     Debug.WriteLine($"Predicted Image by KNN Classifier: {prediction.PredictedInput} - Similarity: {Math.Round(prediction.Similarity, 2) * 100}%");
-                    int[] reconstructedKNN = knnClassifier.ReconstructInput(predictedImagesKNN);
-                    reconstructor.SaveReconstructedImage(reconstructedKNN, outputReconstructedKNNFolder, "Reconstructed_KNN", prediction.PredictedInput);
                 }
+
+                Dictionary<int, double> reconstructedPermanence = sp.Reconstruct(activeCols);
+                int maxInput = inputVector.Length;
+
+                // Create a new dictionary to store extended probabilities
+                Dictionary<int, double> allPermanenceDictionary = new Dictionary<int, double>();
+                // Iterate through all possible inputs using a foreach loop
+                foreach (var kvp in reconstructedPermanence)
+                {
+                    int inputIndex = kvp.Key;
+                    double probability = kvp.Value;
+
+                    // Use the existing probability
+                    allPermanenceDictionary[inputIndex] = probability;
+                }
+
+                //Assinginig the inactive columns Permanence 0
+                for (int inputIndex = 0; inputIndex < maxInput; inputIndex++)
+                {
+                    if (!reconstructedPermanence.ContainsKey(inputIndex))
+                    {
+                        // Key doesn't exist, set the probability to 0
+                        allPermanenceDictionary[inputIndex] = 0.0;
+                    }
+                }
+
+                // Sort the dictionary by keys
+                var sortedAllPermanenceDictionary = allPermanenceDictionary.OrderBy(kvp => kvp.Key);
+                // Convert the sorted dictionary of allpermanences to a list
+                List<double> permanenceValuesList = sortedAllPermanenceDictionary.Select(kvp => kvp.Value).ToList();
+                //Normalizing Permanence Threshold
+                var ThresholdValue = 30.5;
+
+                //Normalize permanences(0 and 1) based on the threshold value and convert them to a list of integers.
+                List<int> normalizePermanenceList = Helpers.ThresholdingProbabilities(permanenceValuesList, ThresholdValue);
+
+                // Define the output text file path
+                string fileNameOnly = Path.GetFileNameWithoutExtension(binarizedImagePath);
+                string reconstructedTxtPath = Path.Combine(outputFolderRec, $"reconstructed_{fileNameOnly}.txt");
+
+                // Convert the 1D list into a 2D binary-like structure
+                using (StreamWriter writer = new StreamWriter(reconstructedTxtPath))
+                {
+                    for (int i = 0; i < imgHeight; i++)
+                    {
+                        // Extract a row of binary values from the flattened list
+                        var row = normalizePermanenceList.Skip(i * imgWidth).Take(imgWidth);
+
+                        // Convert row to a string and write to the file
+                        writer.WriteLine(string.Join("", row));
+                    }
+                }
+
+                Debug.WriteLine($"Reconstructed binary SDR saved: {reconstructedTxtPath}");
+
             }
             Debug.WriteLine("Prediction Phase Completed.\n");
             Debug.WriteLine($"Binary SDR images reconstructed and saved");
