@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NeoCortexApi.Utility;
 
 namespace NeoCortexApiSample
 {
@@ -21,7 +22,7 @@ namespace NeoCortexApiSample
             this.imgHeight = imgHeight;
         }
 
-        public void ReconstructAndSave(SpatialPooler sp, Cell[] predictedCells, string outputFolder, string fileName, int[] inputVector)
+        public double ReconstructAndSave(SpatialPooler sp, Cell[] predictedCells, string outputFolder, string fileName, int[] inputVector)
         {
             var predictedCols = predictedCells.Select(c => c.Index).Distinct().ToArray();
             // Create a new dictionary to store extended probabilities
@@ -46,6 +47,9 @@ namespace NeoCortexApiSample
             List<double> permanenceValuesList = sortedAllPermanenceDictionary.Select(kvp => kvp.Value).ToList();
             // Normalizing Permanence Threshold
             List<int> normalizePermanenceList = Helpers.ThresholdingProbabilities(permanenceValuesList, 40.5);
+            // *Calculate Similarity*
+            var similarity = MathHelpers.JaccardSimilarityofBinaryArrays(inputVector, normalizePermanenceList.ToArray());
+            double[] similarityArray = new double[] { similarity };
             // Define the output text file name
             string reconstructedTxtPath = Path.Combine(outputFolder, fileName);
 
@@ -62,6 +66,7 @@ namespace NeoCortexApiSample
             }
 
             Debug.WriteLine($"Reconstructed Image Saved: {reconstructedTxtPath}");
+            return similarity;
         }
     }
 }
