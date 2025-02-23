@@ -271,7 +271,8 @@ namespace NeoCortexApiSample
 
                     if (actualImagesSDRs.TryGetValue(bestPredictionHTM.PredictedInput, out Cell[] predictedHTMCells))
                     {
-                        reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{fileName}.txt", inputVector);
+                        double similarityHTM = reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{fileName}.txt", inputVector);
+                        Debug.WriteLine($"HTM Reconstructed Image Similarity: {similarityHTM:F2}");
                     }
                 
                 }
@@ -285,7 +286,8 @@ namespace NeoCortexApiSample
 
                     if (actualImagesSDRs.TryGetValue(bestPredictionKNN.PredictedInput, out Cell[] predictedKNNCells))
                     {
-                        reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{fileName}.txt", inputVector);
+                        double similarityKNN = reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{fileName}.txt", inputVector);
+                        Debug.WriteLine($"KNN Reconstructed Image Similarity: {similarityKNN:F2}");
                     }
                 }
 
