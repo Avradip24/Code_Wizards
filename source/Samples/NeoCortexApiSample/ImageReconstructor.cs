@@ -45,9 +45,7 @@ namespace NeoCortexApiSample
             // Convert the sorted dictionary of all permanences to a list
             List<double> permanenceValuesList = sortedAllPermanenceDictionary.Select(kvp => kvp.Value).ToList();
             // Normalizing Permanence Threshold
-            List<int> normalizePermanenceList = Helpers.ThresholdingProbabilities(permanenceValuesList, 30.5);
-            // Remove "_Binarized" from the filename if present
-               fileName = fileName.Replace("_Binarized", "");
+            List<int> normalizePermanenceList = Helpers.ThresholdingProbabilities(permanenceValuesList, 40.5);
             // Define the output text file name
             string reconstructedTxtPath = Path.Combine(outputFolder, fileName);
 

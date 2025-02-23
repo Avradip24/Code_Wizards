@@ -257,17 +257,19 @@ namespace NeoCortexApiSample
                 var predictedImagesKNN = knnClassifier.GetPredictedInputValues(cells, 1);
 
                 string fileNameOnly = Path.GetFileNameWithoutExtension(binarizedImagePath);
+                string fileName = fileNameOnly.Replace("_Binarized", "");
 
                 // Process HTM Classifier Predictions
                 if (predictedImagesHTM.Count > 0)
                 {
                     // Get the highest similarity prediction
                     var bestPredictionHTM = predictedImagesHTM.OrderByDescending(p => p.Similarity).First();
-                    Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput} - Similarity: {bestPredictionHTM.Similarity}%");
+                    Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput}");
+                    Debug.WriteLine("Prediction Phase for HTM Completed.\n");
 
                     if (actualImagesSDRs.TryGetValue(bestPredictionHTM.PredictedInput, out Cell[] predictedHTMCells))
                     {
-                        reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{fileNameOnly}.txt", inputVector);
+                        reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{fileName}.txt", inputVector);
                     }
                 
                 }
@@ -276,18 +278,19 @@ namespace NeoCortexApiSample
                 {
                     // Get the highest similarity prediction
                     var bestPredictionKNN = predictedImagesKNN.OrderByDescending(p => p.Similarity).First();
-                    Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput} - Similarity: {Math.Round(bestPredictionKNN.Similarity, 2) * 100}%");
+                    Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput}");
+                    Debug.WriteLine("Prediction Phase for KNN Completed.\n");
 
                     if (actualImagesSDRs.TryGetValue(bestPredictionKNN.PredictedInput, out Cell[] predictedKNNCells))
                     {
-                        reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{fileNameOnly}.txt", inputVector);
+                        reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{fileName}.txt", inputVector);
                     }
                 }
 
                 
             }
-            Debug.WriteLine("Prediction Phase Completed.\n");
-            Debug.WriteLine($"Binary SDR images reconstructed and saved");
+            
+            Debug.WriteLine($"Reconstruction Completed");
 
             // ===========================
             //    RESET CLASSIFIER
