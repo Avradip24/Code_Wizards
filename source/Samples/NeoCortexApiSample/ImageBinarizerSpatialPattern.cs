@@ -163,7 +163,7 @@ namespace NeoCortexApiSample
             // ===========================
             //       SPATIAL POOLER PHASE
             // ===========================
-
+            Stopwatch stopwatch = Stopwatch.StartNew();
             while (currentCycle < maxCycles)
             {
                 foreach (var binarizedImagePath in binarizedImagePaths)
@@ -202,13 +202,14 @@ namespace NeoCortexApiSample
             }
 
             Debug.WriteLine("It has reached the stable stage\n");
-
+            stopwatch.Stop();
+            Debug.WriteLine($"\nSpatial Pooler Training Time: {stopwatch.ElapsedMilliseconds} ms");
             // ===========================
             //      CLASSIFIER TRAINING PHASE
             // ===========================
             Debug.WriteLine("Starting Classifier Training Phase...");
 
-
+            Stopwatch stopwatchclassifier = Stopwatch.StartNew();
             foreach (var entry in actualImagesSDRs)
             {
                 string actualImageKey = entry.Key;
@@ -221,7 +222,8 @@ namespace NeoCortexApiSample
             }
 
             Debug.WriteLine("Classifier Training Completed.\n");
-
+            stopwatchclassifier.Stop();
+            Debug.WriteLine($"Classifier Training Time: {stopwatchclassifier.ElapsedMilliseconds} ms");
             // ===========================
             //      PREDICTION PHASE
             // ===========================
