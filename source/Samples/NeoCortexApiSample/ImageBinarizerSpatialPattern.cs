@@ -237,13 +237,27 @@ namespace NeoCortexApiSample
             if (Directory.Exists(outputReconstructedKNNFolder)) Directory.Delete(outputReconstructedKNNFolder, true);
             // Recreate the folder
             Directory.CreateDirectory(outputReconstructedKNNFolder);
+
+            String htmSimilarityFolder = ".\\HTMSimilarityPlot";
+            if (Directory.Exists(htmSimilarityFolder)) Directory.Delete(htmSimilarityFolder, true);
+            // Recreate the folder
+            Directory.CreateDirectory(htmSimilarityFolder);
+            // Define the file name
+            string htmSimilarityFile = "combined_similarity_plot_Image_Inputs.png";
+
+            String knnSimilarityFolder = ".\\KNNSimilarityPlot";
+            if (Directory.Exists(knnSimilarityFolder)) Directory.Delete(knnSimilarityFolder, true);
+            // Recreate the folder
+            Directory.CreateDirectory(knnSimilarityFolder);
+            // Define the file name
+            string knnSimilarityFile = "combined_similarity_plot_Image_Inputs.png";
+
             // Instantiate the ImageReconstructor with required dimensions
             ImageReconstructor reconstructor = new ImageReconstructor(imgWidth, imgHeight);
             // Lists to store similarity values
             List<double> htmSimilarities = new List<double>();
             List<double> knnSimilarities = new List<double>();
-
-
+            
             foreach (var binarizedImagePath in binarizedImagePaths)
             {
                 int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
@@ -278,10 +292,7 @@ namespace NeoCortexApiSample
                         Debug.WriteLine($"HTM Reconstructed Image Similarity: {similarityHTM:F2}");
                         // Store the similarity value for HTM
                         htmSimilarities.Add(similarityHTM); // Store similarity value
-                        Debug.WriteLine($"HTM Similarity Stored: {similarityHTM:F2}");
-
                     }
-                
                 }
 
                 if (predictedImagesKNN.Count > 0)
@@ -297,7 +308,6 @@ namespace NeoCortexApiSample
                         Debug.WriteLine($"KNN Reconstructed Image Similarity: {similarityKNN:F2}");
                         // Store similarity for KNN and debug
                         knnSimilarities.Add(similarityKNN);  // Store similarity for KNN
-                        Debug.WriteLine($"KNN Similarity Stored: {similarityKNN:F2}");
                     }
                 }
                 // ========================
@@ -327,7 +337,11 @@ namespace NeoCortexApiSample
                     }
                 }
             }
-            
+            // Generate the Similarity graph using the HTM Similarity list
+            DrawSimilarityPlots(htmSimilarities, htmSimilarityFolder, htmSimilarityFile);
+            // Generate the Similarity graph using the KNN Similarity list
+            DrawSimilarityPlots(knnSimilarities, knnSimilarityFolder, knnSimilarityFile);
+
             Debug.WriteLine($"Reconstruction Completed");
 
             // ===========================
@@ -337,6 +351,26 @@ namespace NeoCortexApiSample
             htmClassifier.ClearState();
             knnClassifier.ClearState();
             return sp;
+        }
+
+        public static void DrawSimilarityPlots(List<double> similaritiesList, string similarityFolder, string fileName)
+        {
+            // Combine all similarities from the list of arrays
+
+            List<double> combinedSimilarities = new List<double>();
+            foreach (var similarities in similaritiesList)
+
+            {
+                combinedSimilarities.AddRange(similarities);
+            }
+            // Define the file path with the folder path and file name
+            string filePath = Path.Combine(similarityFolder, fileName);
+
+            // Draw the combined similarity plot
+            NeoCortexUtils.DrawCombinedSimilarityPlot(combinedSimilarities, filePath, 1000, 850);
+
+            Debug.WriteLine($"Combined similarity plot generated and saved successfully.");
+
         }
 
         /// <summary>
@@ -439,9 +473,9 @@ namespace NeoCortexApiSample
                 similarityList.Add(similarityArray);
             }
             // Generate the 1D heatmaps using the heatmapData list
-            Generate1DHeatmaps(heatmapData, BinarizedencodedInputs, normalizedPermanence);
+            //Generate1DHeatmaps(heatmapData, BinarizedencodedInputs, normalizedPermanence);
             // Generate the Similarity graph using the Similarity list
-            DrawSimilarityPlots(similarityList);
+            //DrawSimilarityPlots(similarityList);
         }
 
         /// <summary>
