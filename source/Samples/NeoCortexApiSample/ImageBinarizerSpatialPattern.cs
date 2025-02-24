@@ -126,7 +126,6 @@ namespace NeoCortexApiSample
             }
             Debug.WriteLine("All images are binarized and mapped to actual images");
 
-
             HomeostaticPlasticityController hpa = new HomeostaticPlasticityController(mem, actualImages.Length * 50, (isStable, numPatterns, actColAvg, seenInputs) =>
             {
                 // Event should only be fired when entering the stable state.
@@ -240,6 +239,10 @@ namespace NeoCortexApiSample
             Directory.CreateDirectory(outputReconstructedKNNFolder);
             // Instantiate the ImageReconstructor with required dimensions
             ImageReconstructor reconstructor = new ImageReconstructor(imgWidth, imgHeight);
+            // Lists to store similarity values
+            List<double> htmSimilarities = new List<double>();
+            List<double> knnSimilarities = new List<double>();
+
 
             foreach (var binarizedImagePath in binarizedImagePaths)
             {
@@ -273,6 +276,10 @@ namespace NeoCortexApiSample
                     {
                         double similarityHTM = reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{fileName}.txt", inputVector);
                         Debug.WriteLine($"HTM Reconstructed Image Similarity: {similarityHTM:F2}");
+                        // Store the similarity value for HTM
+                        htmSimilarities.Add(similarityHTM); // Store similarity value
+                        Debug.WriteLine($"HTM Similarity Stored: {similarityHTM:F2}");
+
                     }
                 
                 }
@@ -288,10 +295,11 @@ namespace NeoCortexApiSample
                     {
                         double similarityKNN = reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{fileName}.txt", inputVector);
                         Debug.WriteLine($"KNN Reconstructed Image Similarity: {similarityKNN:F2}");
+                        // Store similarity for KNN and debug
+                        knnSimilarities.Add(similarityKNN);  // Store similarity for KNN
+                        Debug.WriteLine($"KNN Similarity Stored: {similarityKNN:F2}");
                     }
                 }
-
-                
             }
             
             Debug.WriteLine($"Reconstruction Completed");
