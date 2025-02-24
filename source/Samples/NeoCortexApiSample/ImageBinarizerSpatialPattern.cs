@@ -300,6 +300,32 @@ namespace NeoCortexApiSample
                         Debug.WriteLine($"KNN Similarity Stored: {similarityKNN:F2}");
                     }
                 }
+                // ========================
+                // Comparison of Classifiers
+                // ========================
+                // Add per-input comparison based on similarity
+                for (int i = 0; i < htmSimilarities.Count; i++)
+                {
+                    double htmSimilarity = htmSimilarities[i];
+                    double knnSimilarity = knnSimilarities[i];
+
+                    // Ternary logic with equality check
+                    string betterClassifier = knnSimilarity > htmSimilarity
+                        ? "KNN"
+                        : (htmSimilarity > knnSimilarity
+                            ? "HTM"
+                            : "Both classifiers performed equally");
+
+                    // Output which classifier performed better or if both were equal
+                    if (betterClassifier == "Both classifiers performed equally")
+                    {
+                        Debug.WriteLine($"Both classifiers performed equally for image {i + 1} with KNN similarity: {knnSimilarity:F2} and HTM similarity: {htmSimilarity:F2}");
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"{betterClassifier} performed better for image {i + 1} with KNN similarity: {knnSimilarity:F2} and HTM similarity: {htmSimilarity:F2}");
+                    }
+                }
             }
             
             Debug.WriteLine($"Reconstruction Completed");
