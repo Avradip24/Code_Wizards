@@ -18,6 +18,7 @@
   - [Methodolgy of HTM Classifier](#methodolgy-of-htm-classifier)
 - [Difference between HTM and KNN Classifiers](#difference-between-htm-and-knn-classifiers)
 - [Methodology](#methodology)
+- [Reconstruction of Images](#reconstruction-of-images)
 
 
 ### Problem Statement:
@@ -150,6 +151,9 @@ The core difference between Hierarchical Temporal Memory (HTM) and K-Nearest Nei
 
 - **Similarity Metrics and Interpretability:** In this project, HTM employs similarity metrics like the Jaccard Index to evaluate the overlap between the original and reconstructed SDRs. This interpretability and quantitative measure of learning are inherent to HTM. In contrast, KNN's interpretability is limited to understanding which neighbors influence a classification decision, and it does not contribute to understanding the underlying structure of the data.
 
+### Reconstruction of Images:
+The reconstruction process regenerates an image representation from its Sparse Distributed Representation (SDR). Each binarized input image is processed by the Spatial Pooler (SP), which identifies active columns representing key features. Using these active columns, the SP reconstructs permanence values, estimating the likelihood of each pixel being active. Pixels that were not part of the active columns are assigned a permanence value of zero to maintain consistency. The permanence values are then sorted and normalized using a thresholding method, converting them into a binary-like format. Values above a set threshold (e.g., 40.5%) are marked as 1 (active), while lower values are 0 (inactive). The reconstructed image is then saved in text format, with separate folders (ReconstructedHTM and ReconstructedKNN) for images reconstructed using the HTM and KNN classifiers, allowing comparative evaluation.
+
 ### Methodology
  **There are various Methods used in the Experiment keeping in mind the concept of code reusabilty:**
 - **1. Program.cs** -This C# code sample demonstrates a basic experiment framework for implementing the Spatial Pooler (SP) algorithms using the NeoCortexApi library. The program presents a console-based menu allowing users to run Spatial Pooler and thereby predicting images with two classifiers namely HTM and KNN.
@@ -158,4 +162,4 @@ The core difference between Hierarchical Temporal Memory (HTM) and K-Nearest Nei
 
 - **3. ImageBinarizer.cs** - This C# code processes an input image by converting it into a binary text representation based on predefined color thresholds and saves the result as a text file. It first constructs the output file path by appending .txt to the specified destinationPath and removes any existing file with the same name to ensure a fresh output. The function then creates an instance of ImageBinarizer with parameters that define the binarization process, including red, green, and blue threshold values set at 200, the desired output image dimensions, and the input and output file paths. The Run method is executed to process the image, converting pixels that exceed the RGB thresholds into active ('1') values while marking others as inactive ('0'). Finally, the function returns the path to the generated text file, which contains a structured binary representation of the original image that can be used further for Spatial Pooler training.
 
-- **4. ImageReconstruction.cs** - This C# code converts the Sparse Distributed Representation (SDR) into a binary text-based image by mapping active indices onto a 2D grid and saving the result as a text file. It begins by initializing a 2D character array of size imgWidth × imgHeight, filling it with '0' to represent inactive pixels. The function then determines the highest SDR index to normalize and scale the given indices within the grid’s range. Each scaled index is mapped to its corresponding row and column, where active SDR positions are marked as '1'. Finally, the binarized image is written to a text file, with each row of the grid saved as a new line, creating a structured representation of the SDR that can be used for visualization or further processing.
+- **4. ImageReconstruction.cs** - The ImageReconstructor.cs class reconstructs images from Sparse Distributed Representations (SDRs) using predicted active columns from classifiers. It extracts active columns, estimates permanence values with the Spatial Pooler (SP), normalizes them into a binary format, and saves the output as a text file. Inactive columns are assigned a permanence value of 0.0 to maintain consistency. The reconstructed images are stored in separate folders (ReconstructedHTM and ReconstructedKNN) for performance comparison between the HTM and KNN classifiers. This process visualizes how accurately the classifiers predict original images based on learned SDR patterns.
