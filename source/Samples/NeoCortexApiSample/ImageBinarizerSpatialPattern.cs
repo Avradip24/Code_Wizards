@@ -472,45 +472,6 @@ namespace NeoCortexApiSample
                 //Collecting Similarity Data for visualizing
                 similarityList.Add(similarityArray);
             }
-            // Generate the 1D heatmaps using the heatmapData list
-            //Generate1DHeatmaps(heatmapData, BinarizedencodedInputs, normalizedPermanence);
-            // Generate the Similarity graph using the Similarity list
-            //DrawSimilarityPlots(similarityList);
-        }
-
-        /// <summary>
-        /// Generates 1D heatmaps based on the provided heatmap data and normalized permanence values.
-        /// </summary>
-        /// <param name="heatmapData">List of lists containing heatmap data.</param>
-        /// <param name="normalizedPermanence">List of arrays containing normalized permanence values.</param>
-        private void Generate1DHeatmaps(List<List<double>> heatmapData, List<int[]> normalizedPermanence, List<int[]> BinarizedencodedInputs)
-        {
-            int i = 1;
-
-            foreach (var values in heatmapData)
-            {
-                // Define the folder path based on your requirements
-                string folderPath = Path.Combine(Environment.CurrentDirectory, "1DHeatMap_Image_Inputs");
-
-                // Create the folder if it doesn't exist
-                if (!Directory.Exists(folderPath))
-                {
-                    Directory.CreateDirectory(folderPath);
-                }
-                // Define the file path with the folder path
-                string filePath = Path.Combine(folderPath, $"heatmap_{i}.png");
-                Debug.WriteLine($"FilePath: {filePath}");
-
-                // Convert the probabilitiesList to a 1D array using ToArray
-                double[] array1D = values.ToArray();
-
-                // Call the  Draw1DHeatmap function with the dynamically generated file path along with all necessary Perameters
-                NeoCortexUtils.Draw1dHeatmap(new List<double[]>() { array1D }, new List<int[]>() { normalizedPermanence[i - 1] }, new List<int[]>() { BinarizedencodedInputs[i - 1] }, filePath, 784, 15, 30, 15, 5, 30);
-
-                Debug.WriteLine("Heatmap generated and saved successfully.");
-                i++;
-            }
-
         }        
     }
 }
