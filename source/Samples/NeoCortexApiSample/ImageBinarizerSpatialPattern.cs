@@ -243,21 +243,21 @@ namespace NeoCortexApiSample
             // Recreate the folder
             Directory.CreateDirectory(htmSimilarityFolder);
             // Define the file name
-            string htmSimilarityFile = "combined_similarity_plot_Image_Inputs.png";
+            string htmSimilarityFile = "combined_similarity_plot_HTM_Image_Inputs.png";
 
             String knnSimilarityFolder = ".\\KNNSimilarityPlot";
             if (Directory.Exists(knnSimilarityFolder)) Directory.Delete(knnSimilarityFolder, true);
             // Recreate the folder
             Directory.CreateDirectory(knnSimilarityFolder);
             // Define the file name
-            string knnSimilarityFile = "combined_similarity_plot_Image_Inputs.png";
+            string knnSimilarityFile = "combined_similarity_plot_KNN_Image_Inputs.png";
 
             // Instantiate the ImageReconstructor with required dimensions
             ImageReconstructor reconstructor = new ImageReconstructor(imgWidth, imgHeight);
             // Lists to store similarity values
             List<double> htmSimilarities = new List<double>();
             List<double> knnSimilarities = new List<double>();
-            
+
             foreach (var binarizedImagePath in binarizedImagePaths)
             {
                 int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
@@ -268,7 +268,7 @@ namespace NeoCortexApiSample
 
                 var activeCols = ArrayUtils.IndexWhere(activeArray, (el) => el == 1);
                 var cells = activeCols.Select(index => new Cell { Index = index }).ToArray();
-               
+
                 // Get predicted image by htm classifier
                 var predictedImagesHTM = htmClassifier.GetPredictedInputValues(cells, 1);
 
@@ -283,32 +283,26 @@ namespace NeoCortexApiSample
                 {
                     // Get the highest similarity prediction
                     var bestPredictionHTM = predictedImagesHTM.OrderByDescending(p => p.Similarity).First();
-                    Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput}");
-                    Debug.WriteLine("Prediction Phase for HTM Completed.\n");
+                    Cell[] predictedHTMCells = bestPredictionHTM.SDR.Select(index => new Cell { Index = index }).ToArray();
+                    Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput}\nSDR: [{string.Join(",", bestPredictionHTM.SDR)}]\n");
+                    double similarityHTM = reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{fileName}.txt", inputVector);
+                    Debug.WriteLine($"HTM Reconstructed Image Similarity: {similarityHTM:F2}\n");
+                    // Store the similarity value for HTM
+                    htmSimilarities.Add(similarityHTM); // Store similarity value
 
-                    if (actualImagesSDRs.TryGetValue(bestPredictionHTM.PredictedInput, out Cell[] predictedHTMCells))
-                    {
-                        double similarityHTM = reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{fileName}.txt", inputVector);
-                        Debug.WriteLine($"HTM Reconstructed Image Similarity: {similarityHTM:F2}");
-                        // Store the similarity value for HTM
-                        htmSimilarities.Add(similarityHTM); // Store similarity value
-                    }
                 }
 
                 if (predictedImagesKNN.Count > 0)
                 {
                     // Get the highest similarity prediction
                     var bestPredictionKNN = predictedImagesKNN.OrderByDescending(p => p.Similarity).First();
-                    Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput}");
-                    Debug.WriteLine("Prediction Phase for KNN Completed.\n");
+                    Cell[] predictedKNNCells = bestPredictionKNN.SDR.Select(index => new Cell { Index = index }).ToArray();
+                    Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput}\nSDR: [{string.Join(",", bestPredictionKNN.SDR)}]\n");
+                    double similarityKNN = reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{fileName}.txt", inputVector);
+                    Debug.WriteLine($"KNN Reconstructed Image Similarity: {similarityKNN:F2}\n");
+                    // Store similarity for KNN and debug
+                    knnSimilarities.Add(similarityKNN);  // Store similarity for KNN
 
-                    if (actualImagesSDRs.TryGetValue(bestPredictionKNN.PredictedInput, out Cell[] predictedKNNCells))
-                    {
-                        double similarityKNN = reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{fileName}.txt", inputVector);
-                        Debug.WriteLine($"KNN Reconstructed Image Similarity: {similarityKNN:F2}");
-                        // Store similarity for KNN and debug
-                        knnSimilarities.Add(similarityKNN);  // Store similarity for KNN
-                    }
                 }
                 // ========================
                 // Comparison of Classifiers
