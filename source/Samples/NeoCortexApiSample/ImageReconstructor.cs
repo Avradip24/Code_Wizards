@@ -22,7 +22,7 @@ namespace NeoCortexApiSample
             this.imgHeight = imgHeight;
         }
 
-        public double ReconstructAndSave(SpatialPooler sp, Cell[] predictedCells, string outputFolder, string fileName, int[] inputVector)
+        public void ReconstructAndSave(SpatialPooler sp, Cell[] predictedCells, string outputFolder, string fileName, int[] inputVector)
         {
             var predictedCols = predictedCells.Select(c => c.Index).Distinct().ToArray();
             // Create a new dictionary to store extended probabilities
@@ -66,7 +66,7 @@ namespace NeoCortexApiSample
             }
 
             Debug.WriteLine($"Reconstructed Image Saved: {reconstructedTxtPath}");
-            return similarity;
+            //return similarity;
         }
     }
 }
