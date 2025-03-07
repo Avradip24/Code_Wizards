@@ -114,7 +114,7 @@ namespace NeoCortexApiSample
             Directory.CreateDirectory(outputFolder);
 
             // Dictionaries to map actual images to their SDRs for later training phase
-            Dictionary<string, Cell[]> actualImagesSDRs = new Dictionary<string, Cell[]>();
+            Dictionary<string, Cell[]> trainingImagesSDRs = new Dictionary<string, Cell[]>();
             Dictionary<string, string> binarizedTrainingToActualMap = new Dictionary<string, string>();
             Dictionary<string, string> binarizedTestToActualMap = new Dictionary<string, string>();
 
@@ -192,7 +192,7 @@ namespace NeoCortexApiSample
             Stopwatch stopwatch = Stopwatch.StartNew();
             while (currentCycle < maxCycles)
             {
-                foreach (var binarizedImagePath in binarizedImagePaths)
+                foreach (var binarizedImagePath in binarizedTrainingImagePaths)
                 {
                     // Read Binarized and Encoded input CSV file into an array
                     int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
@@ -206,10 +206,10 @@ namespace NeoCortexApiSample
                     string binarizedKey = Path.GetFileNameWithoutExtension(binarizedImagePath);
 
                     // Store SDR representation mapped to the actual image for later training
-                    string actualImageKey = binarizedToActualMap[binarizedKey];
-                    actualImagesSDRs[actualImageKey] = cells;
+                    string trainingImageKey = binarizedTrainingToActualMap[binarizedKey];
+                    trainingImagesSDRs[trainingImageKey] = cells;
 
-                    Debug.WriteLine($"Cycle: {currentCycle} - Image-Input: {actualImageKey}");
+                    Debug.WriteLine($"Cycle: {currentCycle} - Image-Input: {trainingImageKey}");
                     Debug.WriteLine($"INPUT :{Helpers.StringifyVector(inputVector)}");
                     Debug.WriteLine($"SDR: {Helpers.StringifyVector(activeCols)}\n");
 
@@ -236,7 +236,7 @@ namespace NeoCortexApiSample
             Debug.WriteLine("Starting Classifier Training Phase...");
 
             Stopwatch stopwatchclassifier = Stopwatch.StartNew();
-            foreach (var entry in actualImagesSDRs)
+            foreach (var entry in trainingImagesSDRs)
             {
                 string actualImageKey = entry.Key;
                 Cell[] cells = entry.Value;
@@ -285,7 +285,7 @@ namespace NeoCortexApiSample
             List<double> htmSimilarities = new List<double>();
             List<double> knnSimilarities = new List<double>();
 
-            foreach (var binarizedImagePath in binarizedImagePaths)
+            foreach (var binarizedImagePath in binarizedTestingImagePaths)
             {
                 int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
 
