@@ -92,6 +92,15 @@ namespace NeoCortexApiSample
             var actualImages = Directory.EnumerateFiles(trainingFolder).Where(file => file.StartsWith($"{trainingFolder}\\{inputPrefix}") &&
             (file.EndsWith(".jpeg") || file.EndsWith(".jpg") || file.EndsWith(".png"))).ToArray();
 
+            // Shuffle to ensure randomness
+            Random rnd = new Random();
+            actualImages = actualImages.OrderBy(x => rnd.Next()).ToArray();
+
+            // Define split ratio (e.g., 80% training, 20% testing)
+            int trainSize = (int)(actualImages.Length * 0.8);
+            var trainingImages = actualImages.Take(trainSize).ToArray();
+            var testingImages = actualImages.Skip(trainSize).ToArray();
+
             //Image Size
             int imgHeight = 64;
             int imgWidth = 64;
