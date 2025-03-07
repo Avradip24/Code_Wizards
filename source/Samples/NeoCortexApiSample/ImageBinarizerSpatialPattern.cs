@@ -297,10 +297,10 @@ namespace NeoCortexApiSample
                 var cells = activeCols.Select(index => new Cell { Index = index }).ToArray();
 
                 // Get predicted image by htm classifier
-                var predictedImagesHTM = htmClassifier.GetPredictedInputValues(cells, 1);
+                var predictedImagesHTM = htmClassifier.GetPredictedInputValues(cells, 3);
 
                 // Get top predicted image SDRs from KNN Classifier
-                var predictedImagesKNN = knnClassifier.GetPredictedInputValues(cells, 1);
+                var predictedImagesKNN = knnClassifier.GetPredictedInputValues(cells, 3);
 
                 string fileNameOnly = Path.GetFileNameWithoutExtension(binarizedImagePath);
                 string fileName = fileNameOnly.Replace("_Binarized", "");
@@ -312,10 +312,10 @@ namespace NeoCortexApiSample
                     var bestPredictionHTM = predictedImagesHTM.OrderByDescending(p => p.Similarity).First();
                     Cell[] predictedHTMCells = bestPredictionHTM.SDR.Select(index => new Cell { Index = index }).ToArray();
                     Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput}\nSDR: [{string.Join(",", bestPredictionHTM.SDR)}]\n");
-                    double similarityHTM = reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{fileName}.txt", inputVector);
-                    Debug.WriteLine($"HTM Reconstructed Image Similarity: {similarityHTM:F2}\n");
+                    reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{fileName}.txt", inputVector);
+                    //Debug.WriteLine($"HTM Reconstructed Image Similarity: {similarityHTM:F2}\n");
                     // Store the similarity value for HTM
-                    htmSimilarities.Add(similarityHTM); // Store similarity value
+                    //htmSimilarities.Add(similarityHTM); // Store similarity value
 
                 }
 
@@ -325,43 +325,43 @@ namespace NeoCortexApiSample
                     var bestPredictionKNN = predictedImagesKNN.OrderByDescending(p => p.Similarity).First();
                     Cell[] predictedKNNCells = bestPredictionKNN.SDR.Select(index => new Cell { Index = index }).ToArray();
                     Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput}\nSDR: [{string.Join(",", bestPredictionKNN.SDR)}]\n");
-                    double similarityKNN = reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{fileName}.txt", inputVector);
-                    Debug.WriteLine($"KNN Reconstructed Image Similarity: {similarityKNN:F2}\n");
+                    reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{fileName}.txt", inputVector);
+                    //Debug.WriteLine($"KNN Reconstructed Image Similarity: {similarityKNN:F2}\n");
                     // Store similarity for KNN and debug
-                    knnSimilarities.Add(similarityKNN);  // Store similarity for KNN
+                    //knnSimilarities.Add(similarityKNN);  // Store similarity for KNN
 
                 }
                 // ========================
                 // Comparison of Classifiers
                 // ========================
                 // Add per-input comparison based on similarity
-                for (int i = 0; i < htmSimilarities.Count; i++)
-                {
-                    double htmSimilarity = htmSimilarities[i];
-                    double knnSimilarity = knnSimilarities[i];
+                //    for (int i = 0; i < htmSimilarities.Count; i++)
+                //    {
+                //        double htmSimilarity = htmSimilarities[i];
+                //        double knnSimilarity = knnSimilarities[i];
 
-                    // Ternary logic with equality check
-                    string betterClassifier = knnSimilarity > htmSimilarity
-                        ? "KNN"
-                        : (htmSimilarity > knnSimilarity
-                            ? "HTM"
-                            : "Both classifiers performed equally");
+                //        // Ternary logic with equality check
+                //        string betterClassifier = knnSimilarity > htmSimilarity
+                //            ? "KNN"
+                //            : (htmSimilarity > knnSimilarity
+                //                ? "HTM"
+                //                : "Both classifiers performed equally");
 
-                    // Output which classifier performed better or if both were equal
-                    if (betterClassifier == "Both classifiers performed equally")
-                    {
-                        Debug.WriteLine($"Both classifiers performed equally for image {i + 1} with KNN similarity: {knnSimilarity:F2} and HTM similarity: {htmSimilarity:F2}");
-                    }
-                    else
-                    {
-                        Debug.WriteLine($"{betterClassifier} performed better for image {i + 1} with KNN similarity: {knnSimilarity:F2} and HTM similarity: {htmSimilarity:F2}");
-                    }
-                }
+                //        // Output which classifier performed better or if both were equal
+                //        if (betterClassifier == "Both classifiers performed equally")
+                //        {
+                //            Debug.WriteLine($"Both classifiers performed equally for image {i + 1} with KNN similarity: {knnSimilarity:F2} and HTM similarity: {htmSimilarity:F2}");
+                //        }
+                //        else
+                //        {
+                //            Debug.WriteLine($"{betterClassifier} performed better for image {i + 1} with KNN similarity: {knnSimilarity:F2} and HTM similarity: {htmSimilarity:F2}");
+                //        }
+                //    }
             }
-            // Generate the Similarity graph using the HTM Similarity list
-            DrawSimilarityPlots(htmSimilarities, htmSimilarityFolder, htmSimilarityFile);
-            // Generate the Similarity graph using the KNN Similarity list
-            DrawSimilarityPlots(knnSimilarities, knnSimilarityFolder, knnSimilarityFile);
+            //// Generate the Similarity graph using the HTM Similarity list
+            //DrawSimilarityPlots(htmSimilarities, htmSimilarityFolder, htmSimilarityFile);
+            //// Generate the Similarity graph using the KNN Similarity list
+            //DrawSimilarityPlots(knnSimilarities, knnSimilarityFolder, knnSimilarityFile);
 
             Debug.WriteLine($"Reconstruction Completed");
 
