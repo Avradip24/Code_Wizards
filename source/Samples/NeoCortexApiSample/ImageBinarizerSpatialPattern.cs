@@ -115,25 +115,43 @@ namespace NeoCortexApiSample
 
             // Dictionaries to map actual images to their SDRs for later training phase
             Dictionary<string, Cell[]> actualImagesSDRs = new Dictionary<string, Cell[]>();
-            Dictionary<string, string> binarizedToActualMap = new Dictionary<string, string>();
+            Dictionary<string, string> binarizedTrainingToActualMap = new Dictionary<string, string>();
+            Dictionary<string, string> binarizedTestToActualMap = new Dictionary<string, string>();
 
             // Taking all the binarized image path in a list
-            var binarizedImagePaths = new List<string>();
-            foreach (var actualImage in actualImages)
+            var binarizedTrainingImagePaths = new List<string>();
+            var binarizedTestingImagePaths = new List<string>();
+
+            foreach (var trainingImage in trainingImages)
             {
-                string actualImageKey = Path.GetFileNameWithoutExtension(actualImage);
+                string trainingImageKey = Path.GetFileNameWithoutExtension(trainingImage);
 
                 // Construct the output file name based on the input file name
-                string outputFileName = actualImageKey + "_Binarized";
+                string outputFileName = trainingImageKey + "Training_Binarized";
                 string outputPath = Path.Combine(outputFolder, outputFileName);
 
                 // Binarizing the images
-                string binarizedImagePath = ImageBinarizationUtils.BinarizeImages(imgWidth, imgHeight, outputPath, actualImage);
-                binarizedImagePaths.Add(binarizedImagePath);
+                string binarizedImagePath = ImageBinarizationUtils.BinarizeImages(imgWidth, imgHeight, outputPath, trainingImage);
+                binarizedTrainingImagePaths.Add(binarizedImagePath);
                 //Store mapping from binarized to actual
-                binarizedToActualMap[outputFileName] = actualImageKey;
+                binarizedTrainingToActualMap[outputFileName] = trainingImageKey;
             }
-            Debug.WriteLine("All images are binarized and mapped to actual images");
+            foreach (var testImage in testingImages)
+            {
+                string testingImageKey = Path.GetFileNameWithoutExtension(testImage);
+
+                // Construct the output file name based on the input file name
+                string outputFileName = testingImageKey + "Testing_Binarized";
+                string outputPath = Path.Combine(outputFolder, outputFileName);
+
+                // Binarizing the images
+                string binarizedImagePath = ImageBinarizationUtils.BinarizeImages(imgWidth, imgHeight, outputPath, testImage);
+                binarizedTestingImagePaths.Add(binarizedImagePath);
+                //Store mapping from binarized to actual
+                binarizedTestToActualMap[outputFileName] = testingImageKey;
+            }
+            Debug.WriteLine("All images are binarized");
+
 
             HomeostaticPlasticityController hpa = new HomeostaticPlasticityController(mem, actualImages.Length * 50, (isStable, numPatterns, actColAvg, seenInputs) =>
             {
