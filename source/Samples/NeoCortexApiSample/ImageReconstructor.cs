@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NeoCortexApi.Utility;
+using NeoCortex;
 
 namespace NeoCortexApiSample
 {
@@ -22,7 +23,7 @@ namespace NeoCortexApiSample
             this.imgHeight = imgHeight;
         }
 
-        public void ReconstructAndSave(SpatialPooler sp, Cell[] predictedCells, string outputFolder, string fileName, int[] inputVector)
+        public double ReconstructAndSave(SpatialPooler sp, Cell[] predictedCells, string outputFolder, string fileName, int[] inputVector, string binarizedImage)
         {
             var predictedCols = predictedCells.Select(c => c.Index).Distinct().ToArray();
             // Create a new dictionary to store extended probabilities
@@ -47,9 +48,6 @@ namespace NeoCortexApiSample
             List<double> permanenceValuesList = sortedAllPermanenceDictionary.Select(kvp => kvp.Value).ToList();
             // Normalizing Permanence Threshold
             List<int> normalizePermanenceList = Helpers.ThresholdingProbabilities(permanenceValuesList, 40.5);
-            // *Calculate Similarity*
-            var similarity = MathHelpers.JaccardSimilarityofBinaryArrays(inputVector, normalizePermanenceList.ToArray());
-            double[] similarityArray = new double[] { similarity };
             // Define the output text file name
             string reconstructedTxtPath = Path.Combine(outputFolder, fileName);
 
@@ -64,9 +62,21 @@ namespace NeoCortexApiSample
                     writer.WriteLine(string.Join("", row));
                 }
             }
-
-            Debug.WriteLine($"Reconstructed Image Saved: {reconstructedTxtPath}");
-            //return similarity;
+            string recontructedImage = Path.GetFileNameWithoutExtension(reconstructedTxtPath);
+            // Split the filename by spaces
+            string[] imageName = recontructedImage.Split(' ');
+            // Extract the last two words
+            string recontructedImageName = imageName.Length >= 2 ? $"{imageName[^2]} {imageName[^1]}" : recontructedImage;
+            Debug.WriteLine($"Reconstructed Image Saved as  {recontructedImageName}");
+            int[] reconstructedVectorHTM = NeoCortexUtils.ReadCsvIntegers(reconstructedTxtPath).ToArray();
+            string binarizedFolder = ".\\BinarizedImages";
+            string binarizedImageName = $"{binarizedImage}Training_Binarized.txt";
+            string binarizedImagePath = Path.Combine(binarizedFolder, binarizedImageName);
+            // Read Binarized and Encoded input CSV file into an array
+            int[] binarizedInputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
+            // *Calculate Similarity*
+            var similarity = MathHelpers.JaccardSimilarityofBinaryArrays(binarizedInputVector, reconstructedVectorHTM);
+            return similarity;
         }
     }
 }
