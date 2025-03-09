@@ -291,49 +291,44 @@ namespace NeoCortexApiSample
                 // Get the highest similarity prediction
                 var bestPredictionHTM = predictedImagesHTM.OrderByDescending(p => p.Similarity).First();
                 Cell[] predictedHTMCells = bestPredictionHTM.SDR.Select(index => new Cell { Index = index }).ToArray();
-                Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput}\nHTM predictive cells similarity: {bestPredictionHTM.Similarity}\nSDR: [{string.Join(",", bestPredictionHTM.SDR)}]\n");
+                Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput}\nHTM predictive cells similarity: {bestPredictionHTM.Similarity/100:F2}\nSDR: [{string.Join(",", bestPredictionHTM.SDR)}]\n");
                 double similarityHTM = reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{bestPredictionHTM.PredictedInput}.txt", inputVector, bestPredictionHTM.PredictedInput);
                 Debug.WriteLine($"Similarity between HTM Reconstructed Image and Original Binarized image: {similarityHTM:F2}\n");
                 // Store the similarity value for HTM
-                //htmSimilarities.Add(similarityHTM); // Store similarity value
+                htmSimilarities.Add(similarityHTM); // Store similarity value
 
 
                 // Get the highest similarity prediction
                 var bestPredictionKNN = predictedImagesKNN.OrderByDescending(p => p.Similarity).First();
                 Cell[] predictedKNNCells = bestPredictionKNN.SDR.Select(index => new Cell { Index = index }).ToArray();
-                Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput}\nKNN predictive cells similarity: {bestPredictionKNN.Similarity}\nSDR: [{string.Join(",", bestPredictionKNN.SDR)}]\n");
+                Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput}\nKNN predictive cells similarity: {bestPredictionKNN.Similarity:F2}\nSDR: [{string.Join(",", bestPredictionKNN.SDR)}]\n");
                 double similarityKNN = reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{bestPredictionKNN.PredictedInput}.txt", inputVector, bestPredictionKNN.PredictedInput);
                 Debug.WriteLine($"Similarity between KNN Reconstructed Image and Original Binarized image: {similarityKNN:F2}\n");
                 // Store similarity for KNN and debug
-                //knnSimilarities.Add(similarityKNN);  // Store similarity for KNN
+                knnSimilarities.Add(similarityKNN);  // Store similarity for KNN
 
                 // ========================
-                // Comparison of Classifiers
-                // ========================
-                // Add per-input comparison based on similarity
-                //    for (int i = 0; i < htmSimilarities.Count; i++)
-                //    {
-                //        double htmSimilarity = htmSimilarities[i];
-                //        double knnSimilarity = knnSimilarities[i];
+                //Comparison of Classifiers
+                //========================
+                //Add per - input comparison based on similarity
+                   
+                    string betterClassifier = similarityKNN > similarityHTM
+                        ? "KNN"
+                        : (similarityHTM > similarityKNN
+                            ? "HTM"
+                            : "Both classifiers performed equally");
 
-                //        // Ternary logic with equality check
-                //        string betterClassifier = knnSimilarity > htmSimilarity
-                //            ? "KNN"
-                //            : (htmSimilarity > knnSimilarity
-                //                ? "HTM"
-                //                : "Both classifiers performed equally");
-
-                //        // Output which classifier performed better or if both were equal
-                //        if (betterClassifier == "Both classifiers performed equally")
-                //        {
-                //            Debug.WriteLine($"Both classifiers performed equally for image {i + 1} with KNN similarity: {knnSimilarity:F2} and HTM similarity: {htmSimilarity:F2}");
-                //        }
-                //        else
-                //        {
-                //            Debug.WriteLine($"{betterClassifier} performed better for image {i + 1} with KNN similarity: {knnSimilarity:F2} and HTM similarity: {htmSimilarity:F2}");
-                //        }
-                //    }
-            }
+                    // Output which classifier performed better or if both were equal
+                    if (betterClassifier == "Both classifiers performed equally")
+                    {
+                        Debug.WriteLine($"Both classifiers performed equally for image with KNN similarity: {similarityKNN:F2} and HTM similarity: {similarityHTM:F2}");
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"{betterClassifier} performed better for image with KNN similarity: {similarityHTM:F2} and HTM similarity: {similarityKNN:F2}");
+                    }
+                }
+           
             //// Generate the Similarity graph using the HTM Similarity list
             //DrawSimilarityPlots(htmSimilarities, htmSimilarityFolder, htmSimilarityFile);
             //// Generate the Similarity graph using the KNN Similarity list
