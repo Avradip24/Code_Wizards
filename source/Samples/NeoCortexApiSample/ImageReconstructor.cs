@@ -78,5 +78,41 @@ namespace NeoCortexApiSample
             var similarity = MathHelpers.JaccardSimilarityofBinaryArrays(binarizedInputVector, reconstructedVectorHTM);
             return similarity;
         }
+        public void CompareReconstructedImages(string knnFolder, string htmFolder)
+        {
+            // Get all files from both directories
+            var knnFiles = Directory.GetFiles(knnFolder, "*.txt")
+                                    .Select(f => Path.GetFileNameWithoutExtension(f).Replace("KNN_reconstructed_", "")).ToList();
+
+            var htmFiles = Directory.GetFiles(htmFolder, "*.txt")
+                                    .Select(f => Path.GetFileNameWithoutExtension(f).Replace("HTM_reconstructed_", "")).ToList();
+
+           
+
+            // Find common images in both folders
+            var commonImages = knnFiles.Intersect(htmFiles).ToList();
+
+            if (!commonImages.Any())
+            {
+                Debug.WriteLine("Both the classifiers predicted different images, hence ignoring comparing reconstructed images");
+                return;
+            }
+
+            foreach (var imageName in commonImages)
+            {
+                string knnImagePath = Path.Combine(knnFolder, $"KNN_reconstructed_{imageName}.txt");
+                string htmImagePath = Path.Combine(htmFolder, $"HTM_reconstructed_{imageName}.txt");
+
+                // Read binary vectors from files
+                int[] knnVector = NeoCortexUtils.ReadCsvIntegers(knnImagePath).ToArray();
+                int[] htmVector = NeoCortexUtils.ReadCsvIntegers(htmImagePath).ToArray();
+
+                // Compute Jaccard Similarity
+                double similarity = MathHelpers.JaccardSimilarityofBinaryArrays(knnVector, htmVector);
+
+                // Print similarity to debug window
+                Debug.WriteLine($"Similarity between {imageName} (KNN vs HTM): {similarity:F2}");
+            }
+        }
     }
 }
