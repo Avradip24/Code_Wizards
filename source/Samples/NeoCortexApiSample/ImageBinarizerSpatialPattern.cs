@@ -312,10 +312,7 @@ namespace NeoCortexApiSample
                 //Add per - input comparison based on similarity
 
                 string betterClassifier = similarityKNN > similarityHTM
-                    ? "KNN"
-                    : (similarityHTM > similarityKNN
-                        ? "HTM"
-                        : "Both classifiers performed equally");
+                    ? "KNN" : (similarityHTM > similarityKNN ? "HTM" : "Both classifiers performed equally");
 
                 // Output which classifier performed better or if both were equal
                 if (betterClassifier == "Both classifiers performed equally")
@@ -326,6 +323,9 @@ namespace NeoCortexApiSample
                 {
                     Debug.WriteLine($"{betterClassifier} performed better for image with KNN similarity: {similarityHTM:F2} and HTM similarity: {similarityKNN:F2}");
                 }
+                Debug.WriteLine("Starting comparison of reconstructed images...");
+                reconstructor.CompareReconstructedImages(outputReconstructedKNNFolder, outputReconstructedHTMFolder);
+                Debug.WriteLine("Comparison of reconstructed images completed.");
             }
         //// Generate the Similarity graph using the HTM Similarity list
         //DrawSimilarityPlots(htmSimilarities, htmSimilarityFolder, htmSimilarityFile);
