@@ -265,6 +265,16 @@ namespace NeoCortexApiSample
             // Recreate the folder
             Directory.CreateDirectory(outputReconstructedKNNFolder);
 
+            String htmSimilarityFolder = ".\\HTMSimilarityPlot";
+            if (Directory.Exists(htmSimilarityFolder)) Directory.Delete(htmSimilarityFolder, true);
+            // Recreate the folder
+            Directory.CreateDirectory(htmSimilarityFolder);
+
+            String knnSimilarityFolder = ".\\KNNSimilarityPlot";
+            if (Directory.Exists(knnSimilarityFolder)) Directory.Delete(knnSimilarityFolder, true);
+            // Recreate the folder
+            Directory.CreateDirectory(knnSimilarityFolder);
+
             // Instantiate the ImageReconstructor with required dimensions
             ImageReconstructor reconstructor = new ImageReconstructor(imgWidth, imgHeight);
             // Lists to store similarity values
@@ -294,8 +304,8 @@ namespace NeoCortexApiSample
                 Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput}\nHTM predictive cells similarity: {bestPredictionHTM.Similarity}\nSDR: [{string.Join(",", bestPredictionHTM.SDR)}]\n");
                 double similarityHTM = reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{bestPredictionHTM.PredictedInput}.txt", inputVector, bestPredictionHTM.PredictedInput);
                 Debug.WriteLine($"Similarity between HTM Reconstructed Image and Original Binarized image: {similarityHTM:F2}\n");
-                // Store the similarity value for HTM
-                //htmSimilarities.Add(similarityHTM); // Store similarity value
+                //Store the similarity value for HTM
+                htmSimilarities.Add(similarityHTM); // Store similarity value
 
 
                 // Get the highest similarity prediction
@@ -305,7 +315,7 @@ namespace NeoCortexApiSample
                 double similarityKNN = reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{bestPredictionKNN.PredictedInput}.txt", inputVector, bestPredictionKNN.PredictedInput);
                 Debug.WriteLine($"Similarity between KNN Reconstructed Image and Original Binarized image: {similarityKNN:F2}\n");
                 // Store similarity for KNN and debug
-                //knnSimilarities.Add(similarityKNN);  // Store similarity for KNN
+                knnSimilarities.Add(similarityKNN);  // Store similarity for KNN
                 // ========================
                 //Comparison of Classifiers
                 //========================
@@ -327,12 +337,14 @@ namespace NeoCortexApiSample
                 reconstructor.CompareReconstructedImages(outputReconstructedKNNFolder, outputReconstructedHTMFolder);
                 Debug.WriteLine("Comparison of reconstructed images completed.");
             }
-        //// Generate the Similarity graph using the HTM Similarity list
-        //DrawSimilarityPlots(htmSimilarities, htmSimilarityFolder, htmSimilarityFile);
-        //// Generate the Similarity graph using the KNN Similarity list
-        //DrawSimilarityPlots(knnSimilarities, knnSimilarityFolder, knnSimilarityFile);
+            //// Generate the Similarity graph using the HTM Similarity list
+            //DrawSimilarityPlots(htmSimilarities, htmSimilarityFolder, htmSimilarityFile);
+            //// Generate the Similarity graph using the KNN Similarity list
+            //DrawSimilarityPlots(knnSimilarities, knnSimilarityFolder, knnSimilarityFile);
+            PlotReconstructionResults(htmSimilarities, "HTM Similarity Plot", htmSimilarityFolder);
+            PlotReconstructionResults(knnSimilarities, "KNN Similarity Plot", knnSimilarityFolder);
 
-        Debug.WriteLine($"Reconstruction Completed");
+            Debug.WriteLine($"Reconstruction Completed");
 
             // ===========================
             //    RESET CLASSIFIER
@@ -341,6 +353,29 @@ namespace NeoCortexApiSample
             htmClassifier.ClearState();
             knnClassifier.ClearState();
             return sp;
+        }
+
+        private void PlotReconstructionResults(List<double> similarities, string title, string folderPath)
+        {
+            var plt = new ScottPlot.Plot(800, 600); // Define plot size
+
+            // Generate X values (index of each test image)
+            double[] xValues = Enumerable.Range(0, similarities.Count).Select(i => (double)i).ToArray();
+            double[] yValues = similarities.ToArray();
+
+            // Add scatter plot
+            plt.AddScatter(xValues, yValues, lineWidth: 2, markerSize: 5);
+
+            // Set titles and labels
+            plt.Title(title);
+            plt.XLabel("Test Image Index");
+            plt.YLabel("Reconstruction Similarity");
+
+            // Save plot as an image in the specified folder
+            string filePath = Path.Combine(folderPath, $"{title.Replace(" ", "_")}.png");
+            plt.SaveFig(filePath);
+
+            Console.WriteLine($"Plot saved: {filePath}");
         }
 
         public static void DrawSimilarityPlots(List<double> similaritiesList, string similarityFolder, string fileName)
