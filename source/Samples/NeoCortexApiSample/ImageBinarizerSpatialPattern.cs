@@ -16,7 +16,7 @@ using GridCell.js;
 
 namespace NeoCortexApiSample
 {
-    internal class ImageBinarizerSpatialPattern
+    public class ImageBinarizerSpatialPattern
     {
         public string inputPrefix { get; private set; }
         private IClassifier<Cell, string> htmClassifier;
@@ -80,7 +80,7 @@ namespace NeoCortexApiSample
         /// <param name="cfg"></param>
         /// <param name="inputPrefix"> The name of the images</param>
         /// <returns>The trained bersion of the SP.</returns>
-        private SpatialPooler RunExperiment(HtmConfig cfg, string inputPrefix)
+        public SpatialPooler RunExperiment(HtmConfig cfg, string inputPrefix)
         {
             var mem = new Connections(cfg);
             bool isInStableState = false;
@@ -176,9 +176,9 @@ namespace NeoCortexApiSample
             //Initializing the Spatial Pooler Algorithm
             sp.Init(mem, new DistributedMemory() { ColumnDictionary = new InMemoryDistributedDictionary<int, NeoCortexApi.Entities.Column>(1) });
             //It creates the instance of HTMClassifier
-           // HtmClassifier<string, ComputeCycle> htmClassifier = new HtmClassifier<string, ComputeCycle>();
+            // HtmClassifier<string, ComputeCycle> htmClassifier = new HtmClassifier<string, ComputeCycle>();
             //It creates the instance of KNNClassifier
-           // var knnClassifier = new KNeighborsClassifier<string, ComputeCycle>();
+            // var knnClassifier = new KNeighborsClassifier<string, ComputeCycle>();
 
             int[] activeArray = new int[numColumns];
 
@@ -189,7 +189,7 @@ namespace NeoCortexApiSample
             // ===========================
             //       SPATIAL POOLER PHASE
             // ===========================
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            Stopwatch stopwatchSp = Stopwatch.StartNew();
             while (currentCycle < maxCycles)
             {
                 foreach (var binarizedImagePath in binarizedTrainingImagePaths)
@@ -227,15 +227,22 @@ namespace NeoCortexApiSample
 
             }
 
+
             Debug.WriteLine("It has reached the stable stage\n");
-            stopwatch.Stop();
-            Debug.WriteLine($"\nSpatial Pooler Training Time: {stopwatch.ElapsedMilliseconds} ms");
-            // ===========================
-            //      CLASSIFIER TRAINING PHASE
-            // ===========================
+            stopwatchSp.Stop();
+            Debug.WriteLine($"\nSpatial Pooler Training Time: {stopwatchSp.ElapsedMilliseconds} ms");
+            ClassifierTraining(trainingImagesSDRs);
+            this.PredictionAndReconstruction(sp, activeArray, imgHeight, imgWidth, binarizedTestingImagePaths);
+            return sp;
+        }
+        // ===========================
+        //      CLASSIFIER TRAINING PHASE
+        // ===========================
+        public void ClassifierTraining(Dictionary<string, Cell[]> trainingImagesSDRs)
+        {
             Debug.WriteLine("Starting Classifier Training Phase...");
 
-            Stopwatch stopwatchclassifier = Stopwatch.StartNew();
+            Stopwatch stopwatchClassifier = Stopwatch.StartNew();
             foreach (var entry in trainingImagesSDRs)
             {
                 string actualImageKey = entry.Key;
@@ -248,13 +255,17 @@ namespace NeoCortexApiSample
             }
 
             Debug.WriteLine("Classifier Training Completed.\n");
-            stopwatchclassifier.Stop();
-            Debug.WriteLine($"Classifier Training Time: {stopwatchclassifier.ElapsedMilliseconds} ms");
-            // ===========================
-            //      PREDICTION PHASE
-            // ===========================
+            stopwatchClassifier.Stop();
+            Debug.WriteLine($"Classifier Training Time: {stopwatchClassifier.ElapsedMilliseconds} ms");
+        }
 
+        // ===========================
+        //      PREDICTION PHASE
+        // ===========================
+        public void PredictionAndReconstruction(SpatialPooler sp, int[] activeArray, int imgHeight, int imgWidth, List<string> binarizedTestingImagePaths)
+        {
             Debug.WriteLine("Starting Prediction Phase...");
+            Stopwatch stopwatchReconstruction = Stopwatch.StartNew();
             String outputReconstructedHTMFolder = ".\\ReconstructedHTM";
             if (Directory.Exists(outputReconstructedHTMFolder)) Directory.Delete(outputReconstructedHTMFolder, true);
             // Recreate the folder
@@ -317,10 +328,11 @@ namespace NeoCortexApiSample
                 Debug.WriteLine($"Similarity between KNN Reconstructed Image and Original Binarized image: {similarityKNN:F2}\n");
                 double bestPredictionSimilarityKNN = Math.Round(bestPredictionKNN.Similarity,2);
                 // Store similarity for KNN and debug
-                knnSimilarities.Add(bestPredictionSimilarityKNN);
+                knnSimilarities.Add(bestPredictionSimilarityKNN); // Store similarity for KNN
                 Debug.WriteLine($"Storing KNN Similarity: {bestPredictionSimilarityKNN}, HTM Similarity: {bestPredictionSimilarityHTM}");
-
-                // Store similarity for KNN
+                stopwatchReconstruction.Stop();
+                Debug.WriteLine($"Classifier Prediction and Reconstruction Time: {stopwatchReconstruction.ElapsedMilliseconds} ms");
+                
                 // ========================
                 //Comparison of Classifiers
                 //========================
@@ -357,10 +369,9 @@ namespace NeoCortexApiSample
             Debug.WriteLine("Resetting  both the Classifiers for Next Experiment...");
             htmClassifier.ClearState();
             knnClassifier.ClearState();
-            return sp;
         }
 
-        private void PlotReconstructionResults(List<double> similarities, string title, string folderPath)
+        public void PlotReconstructionResults(List<double> similarities, string title, string folderPath)
         {
             var plt = new ScottPlot.Plot(800, 600); // Define plot size
 
