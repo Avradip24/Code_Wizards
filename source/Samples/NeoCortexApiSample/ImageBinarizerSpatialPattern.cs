@@ -277,9 +277,9 @@ namespace NeoCortexApiSample
 
             // Instantiate the ImageReconstructor with required dimensions
             ImageReconstructor reconstructor = new ImageReconstructor(imgWidth, imgHeight);
-            // Lists to store similarity values
             List<double> htmSimilarities = new List<double>();
             List<double> knnSimilarities = new List<double>();
+
 
             foreach (var binarizedImagePath in binarizedTestingImagePaths)
             {
@@ -301,21 +301,26 @@ namespace NeoCortexApiSample
                 // Get the highest similarity prediction
                 var bestPredictionHTM = predictedImagesHTM.OrderByDescending(p => p.Similarity).First();
                 Cell[] predictedHTMCells = bestPredictionHTM.SDR.Select(index => new Cell { Index = index }).ToArray();
-                Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput}\nHTM predictive cells similarity: {bestPredictionHTM.Similarity}\nSDR: [{string.Join(",", bestPredictionHTM.SDR)}]\n");
+                Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput}\nHTM predictive cells similarity: {bestPredictionHTM.Similarity / 100:F2}\nSDR: [{string.Join(",", bestPredictionHTM.SDR)}]\n");
                 double similarityHTM = reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{bestPredictionHTM.PredictedInput}.txt", inputVector, bestPredictionHTM.PredictedInput);
                 Debug.WriteLine($"Similarity between HTM Reconstructed Image and Original Binarized image: {similarityHTM:F2}\n");
+                double bestPredictionSimilarityHTM = Math.Round(bestPredictionHTM.Similarity / 100.0, 2);
                 //Store the similarity value for HTM
-                htmSimilarities.Add(similarityHTM); // Store similarity value
+                htmSimilarities.Add(bestPredictionSimilarityHTM); // Store similarity value
 
 
                 // Get the highest similarity prediction
                 var bestPredictionKNN = predictedImagesKNN.OrderByDescending(p => p.Similarity).First();
                 Cell[] predictedKNNCells = bestPredictionKNN.SDR.Select(index => new Cell { Index = index }).ToArray();
-                Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput}\nKNN predictive cells similarity: {bestPredictionKNN.Similarity}\nSDR: [{string.Join(",", bestPredictionKNN.SDR)}]\n");
+                Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput}\nKNN predictive cells similarity: {bestPredictionKNN.Similarity:F2}\nSDR: [{string.Join(",", bestPredictionKNN.SDR)}]\n");
                 double similarityKNN = reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{bestPredictionKNN.PredictedInput}.txt", inputVector, bestPredictionKNN.PredictedInput);
                 Debug.WriteLine($"Similarity between KNN Reconstructed Image and Original Binarized image: {similarityKNN:F2}\n");
+                double bestPredictionSimilarityKNN = Math.Round(bestPredictionKNN.Similarity,2);
                 // Store similarity for KNN and debug
-                knnSimilarities.Add(similarityKNN);  // Store similarity for KNN
+                knnSimilarities.Add(bestPredictionSimilarityKNN);
+                Debug.WriteLine($"Storing KNN Similarity: {bestPredictionSimilarityKNN}, HTM Similarity: {bestPredictionSimilarityHTM}");
+
+                // Store similarity for KNN
                 // ========================
                 //Comparison of Classifiers
                 //========================
@@ -331,7 +336,7 @@ namespace NeoCortexApiSample
                 }
                 else
                 {
-                    Debug.WriteLine($"{betterClassifier} performed better for image with KNN similarity: {similarityHTM:F2} and HTM similarity: {similarityKNN:F2}");
+                    Debug.WriteLine($"{betterClassifier} performed better for image with KNN similarity: {similarityKNN:F2} and HTM similarity: {similarityHTM:F2}");
                 }
                 Debug.WriteLine("Starting comparison of reconstructed images...");
                 reconstructor.CompareReconstructedImages(outputReconstructedKNNFolder, outputReconstructedHTMFolder);
