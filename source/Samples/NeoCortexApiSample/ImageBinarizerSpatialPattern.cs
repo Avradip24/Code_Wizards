@@ -326,17 +326,17 @@ namespace NeoCortexApiSample
                 //========================
                 //Add per - input comparison based on similarity
 
-                string betterClassifier = similarityKNN > similarityHTM
-                    ? "KNN" : (similarityHTM > similarityKNN ? "HTM" : "Both classifiers performed equally");
+                string betterClassifier = bestPredictionSimilarityKNN > bestPredictionSimilarityHTM
+                    ? "KNN" : (bestPredictionSimilarityHTM > bestPredictionSimilarityKNN ? "HTM" : "Both classifiers performed equally");
 
                 // Output which classifier performed better or if both were equal
                 if (betterClassifier == "Both classifiers performed equally")
                 {
-                    Debug.WriteLine($"Both classifiers performed equally for image with KNN similarity: {similarityKNN:F2} and HTM similarity: {similarityHTM:F2}");
+                    Debug.WriteLine($"Both classifiers performed equally for image with KNN similarity: {bestPredictionSimilarityKNN} and HTM similarity: {bestPredictionSimilarityHTM}");
                 }
                 else
                 {
-                    Debug.WriteLine($"{betterClassifier} performed better for image with KNN similarity: {similarityKNN:F2} and HTM similarity: {similarityHTM:F2}");
+                    Debug.WriteLine($"{betterClassifier} performed better for image with KNN similarity: {bestPredictionSimilarityKNN} and HTM similarity: {bestPredictionSimilarityHTM}");
                 }
                 Debug.WriteLine("Starting comparison of reconstructed images...");
                 reconstructor.CompareReconstructedImages(outputReconstructedKNNFolder, outputReconstructedHTMFolder);
