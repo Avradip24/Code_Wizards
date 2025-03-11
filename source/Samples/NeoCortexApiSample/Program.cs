@@ -14,7 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
-using static NeoCortexApiSample.MultisequenceLearningTeamMSL;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NeoCortexApiSample
