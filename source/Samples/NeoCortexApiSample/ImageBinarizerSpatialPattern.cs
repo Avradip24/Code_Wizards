@@ -291,7 +291,6 @@ namespace NeoCortexApiSample
             List<double> htmSimilarities = new List<double>();
             List<double> knnSimilarities = new List<double>();
 
-
             foreach (var binarizedImagePath in binarizedTestingImagePaths)
             {
                 int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
@@ -317,7 +316,7 @@ namespace NeoCortexApiSample
                 Debug.WriteLine($"Similarity between HTM Reconstructed Image and Original Binarized image: {similarityHTM:F2}\n");
                 double bestPredictionSimilarityHTM = Math.Round(bestPredictionHTM.Similarity / 100.0, 2);
                 //Store the similarity value for HTM
-                htmSimilarities.Add(bestPredictionSimilarityHTM); // Store similarity value
+                htmSimilarities.Add(similarityHTM); // Store similarity value
 
 
                 // Get the highest similarity prediction
@@ -328,7 +327,7 @@ namespace NeoCortexApiSample
                 Debug.WriteLine($"Similarity between KNN Reconstructed Image and Original Binarized image: {similarityKNN:F2}\n");
                 double bestPredictionSimilarityKNN = Math.Round(bestPredictionKNN.Similarity,2);
                 // Store similarity for KNN and debug
-                knnSimilarities.Add(bestPredictionSimilarityKNN); // Store similarity for KNN
+                knnSimilarities.Add(similarityKNN); // Store similarity for KNN
                 Debug.WriteLine($"Storing KNN Similarity: {bestPredictionSimilarityKNN}, HTM Similarity: {bestPredictionSimilarityHTM}");
                 stopwatchReconstruction.Stop();
                 Debug.WriteLine($"Classifier Prediction and Reconstruction Time: {stopwatchReconstruction.ElapsedMilliseconds} ms");
@@ -354,10 +353,10 @@ namespace NeoCortexApiSample
                 reconstructor.CompareReconstructedImages(outputReconstructedKNNFolder, outputReconstructedHTMFolder);
                 Debug.WriteLine("Comparison of reconstructed images completed.");
             }
-            //// Generate the Similarity graph using the HTM Similarity list
-            //DrawSimilarityPlots(htmSimilarities, htmSimilarityFolder, htmSimilarityFile);
-            //// Generate the Similarity graph using the KNN Similarity list
-            //DrawSimilarityPlots(knnSimilarities, knnSimilarityFolder, knnSimilarityFile);
+            // Generate the Similarity graph using the HTM Similarity list
+            DrawSimilarityPlots(htmSimilarities, htmSimilarityFolder, "HTM Similarity Graph.png");
+            // Generate the Similarity graph using the KNN Similarity list
+            DrawSimilarityPlots(knnSimilarities, knnSimilarityFolder, "KNN Similarity Graph.png");
             PlotReconstructionResults(htmSimilarities, "HTM Similarity Plot", htmSimilarityFolder);
             PlotReconstructionResults(knnSimilarities, "KNN Similarity Plot", knnSimilarityFolder);
 
