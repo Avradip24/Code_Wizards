@@ -20,16 +20,27 @@ namespace NeoCortexApiSample
     {
         //Accessing the Image Folder form the Cureent Directory
         string trainingFolder = "Sample\\TestFiles";
+        // Classifier instance for HTM 
         private IClassifier<Cell, string> htmClassifier;
+        // Classifier instance for KNN 
         private IClassifier<Cell, string> knnClassifier;
-        public ImageBinarizerSpatialPattern()
 
+        /// <summary>
+        /// Initializes a new instance of the class.
+        /// Sets up the classifiers for HTM and KNN models.
+        /// </summary>
+        public ImageBinarizerSpatialPattern()
         {
+            // Initializing Classifiers for HTM and KNN
             htmClassifier = new HtmImageClassifier();
             knnClassifier = new KnnImageClassifier();
 
         }
 
+        /// <summary>
+        /// Represents the result of binarizing images, including mappings between actual images
+        /// and their corresponding binarized representations.
+        /// </summary>
         public class BinarizedImagesResult
         {
             public string[] ActualImages { get; set; }
@@ -50,8 +61,7 @@ namespace NeoCortexApiSample
             double maxBoost = 5.0;
             // We will build a slice of the cortex with the given number of mini-columns
             int numColumns = 64 * 64;
-            // The Size of the Image Height and width is 28 pixel
-            //int imageSize = 25;
+            // The Size of the Image Height and width is 64 pixel
             int imgHeight = 64;
             int imgWidth = 64;
             var colDims = new int[] { 64, 64 };
@@ -80,6 +90,13 @@ namespace NeoCortexApiSample
             // Pass binarized images to Spatial Pooler
             var sp = RunExperiment(cfg, imgHeight, imgWidth, binarizedResult);
         }
+
+        /// <summary>
+        /// Binarizes images from the specified training folder and organizes them into training and testing datasets.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="BinarizedImagesResult"/> containing the binarized images, mappings, and related metadata.
+        /// </returns>
         public BinarizedImagesResult binarizeImage(string trainingFolder)
         {
             //Accessing the Image Folder form the Cureent Directory Folder
@@ -95,7 +112,7 @@ namespace NeoCortexApiSample
             var trainingImages = actualImages.Take(trainSize).ToArray();
             var testingImages = actualImages.Skip(trainSize).ToArray();
 
-            //Image Size
+            //Image Dimensions
             int imgHeight = 64;
             int imgWidth = 64;
 
@@ -103,7 +120,6 @@ namespace NeoCortexApiSample
             String outputFolder = ".\\BinarizedImages";
             // Delete the folder if it exists
             if (Directory.Exists(outputFolder)) Directory.Delete(outputFolder, true);
-
             // Recreate the folder
             Directory.CreateDirectory(outputFolder);
 
@@ -116,6 +132,7 @@ namespace NeoCortexApiSample
             var binarizedTrainingImagePaths = new List<string>();
             var binarizedTestingImagePaths = new List<string>();
 
+            // Process training images
             foreach (var trainingImage in trainingImages)
             {
                 string trainingImageKey = Path.GetFileNameWithoutExtension(trainingImage);
@@ -127,9 +144,10 @@ namespace NeoCortexApiSample
                 // Binarizing the images
                 string binarizedImagePath = ImageBinarizationUtils.BinarizeImages(imgWidth, imgHeight, outputPath, trainingImage);
                 binarizedTrainingImagePaths.Add(binarizedImagePath);
-                //Store mapping from binarized to actual
+                //Store mapping from binarized to actual image name
                 binarizedTrainingToActualMap[outputFileName] = trainingImageKey;
             }
+            // Process testing images
             foreach (var testImage in testingImages)
             {
                 string testingImageKey = Path.GetFileNameWithoutExtension(testImage);
@@ -141,11 +159,12 @@ namespace NeoCortexApiSample
                 // Binarizing the images
                 string binarizedImagePath = ImageBinarizationUtils.BinarizeImages(imgWidth, imgHeight, outputPath, testImage);
                 binarizedTestingImagePaths.Add(binarizedImagePath);
-                //Store mapping from binarized to actual
+                //Store mapping from binarized to actual image name
                 binarizedTestToActualMap[outputFileName] = testingImageKey;
             }
             Debug.WriteLine("All images are binarized");
 
+            // Return binarization results
             return new BinarizedImagesResult
             {
                 ActualImages = actualImages,
@@ -158,10 +177,17 @@ namespace NeoCortexApiSample
         }
 
         /// <summary>
-        /// Implements the experiment.
+        /// Runs an experiment using the Spatial Pooler (SP) algorithm on binarized images.
+        /// This process involves training the SP with binarized image representations and 
+        /// assessing its stability over multiple cycles.
         /// </summary>
-        /// <param name="cfg"></param>
-        /// <returns>The trained bersion of the SP.</returns>
+        /// <param name="cfg">The HTM (Hierarchical Temporal Memory) configuration used for initializing the experiment.</param>
+        /// <param name="imgHeight">The height of the input images in pixels.</param>
+        /// <param name="imgWidth">The width of the input images in pixels.</param>
+        /// <param name="binarizedResult">A <see cref="BinarizedImagesResult"/> containing binarized image data, including SDR mappings.</param>
+        /// <returns>
+        /// The trained <see cref="SpatialPooler"/> instance after processing the binarized image dataset.
+        /// </returns>
         public SpatialPooler RunExperiment(HtmConfig cfg, int imgHeight, int imgWidth, BinarizedImagesResult binarizedResult)
         {
             var mem = new Connections(cfg);
@@ -197,9 +223,7 @@ namespace NeoCortexApiSample
             int maxCycles = 500;
             int currentCycle = 0;
 
-            // ===========================
-            //       SPATIAL POOLER PHASE
-            // ===========================
+            // SPATIAL POOLER PHASE
             Stopwatch stopwatchSp = Stopwatch.StartNew();
             while (currentCycle < maxCycles)
             {
@@ -208,9 +232,10 @@ namespace NeoCortexApiSample
                     // Read Binarized and Encoded input CSV file into an array
                     int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
 
+                    // Compute the active columns for the input vector
                     sp.compute(inputVector, activeArray, true);
 
-                    // Getting the Active Columns
+                    // Extract active column indices and convert them into SDR cells
                     var activeCols = ArrayUtils.IndexWhere(activeArray, (el) => el == 1);
                     var cells = activeCols.Select(index => new Cell { Index = index }).ToArray();
 
@@ -234,6 +259,7 @@ namespace NeoCortexApiSample
                 // Increment numStableCycles only when it's in a stable state
                 if (isInStableState) numStableCycles++;
 
+                // Stop training once the model has remained stable for several cycles
                 if (numStableCycles > 5) break;
 
             }
@@ -242,19 +268,24 @@ namespace NeoCortexApiSample
             Debug.WriteLine("It has reached the stable stage\n");
             stopwatchSp.Stop();
             Debug.WriteLine($"\nSpatial Pooler Training Time: {stopwatchSp.ElapsedMilliseconds} ms");
-            // Train the Classifiers with the Training images SDR
+            // Train classifiers using the generated SDRs from training images
             ClassifierTraining(binarizedResult.TrainingImagesSDRs);
-            // Predict the Training Image based on similarity between the Training and Testing Images
+            // Perform predictions and image reconstruction using testing images
             PredictionAndReconstruction(sp, activeArray, imgHeight, imgWidth, binarizedResult.BinarizedTestingImagePaths);
             return sp;
         }
-        // ===========================
-        //      CLASSIFIER TRAINING PHASE
-        // ===========================
+
+        /// <summary>
+        /// Trains both the HTM and KNN classifiers using the Sparse Distributed Representations (SDRs) of training images.
+        /// </summary>
+        /// <param name="trainingImagesSDRs">
+        /// A dictionary where the key is the actual image identifier (filename or label),
+        /// and the value is an array of <see cref="Cell"/> objects representing the binarized SDR of the image.
+        /// </param>
         public void ClassifierTraining(Dictionary<string, Cell[]> trainingImagesSDRs)
         {
             Debug.WriteLine("Starting Classifier Training Phase...");
-
+            var trainedImages = new List<string>();
             Stopwatch stopwatchClassifier = Stopwatch.StartNew();
             foreach (var entry in trainingImagesSDRs)
             {
@@ -262,42 +293,43 @@ namespace NeoCortexApiSample
                 Cell[] cells = entry.Value;
 
                 htmClassifier.Learn(actualImageKey, cells);
-                Debug.WriteLine($"Trained HTM Classifier on Image: {actualImageKey}");
                 knnClassifier.Learn(actualImageKey, cells);
-                Debug.WriteLine($"Trained KNN Classifier on Image: {actualImageKey}");
+                trainedImages.Add(actualImageKey);
             }
-
+            // Logging trained image names in a readable format
+            Debug.WriteLine($"Trained HTM Classifier on Images: {string.Join(", ", trainedImages)}");
+            Debug.WriteLine($"Trained KNN Classifier on Images: {string.Join(", ", trainedImages)}");
             Debug.WriteLine("Classifier Training Completed.\n");
             stopwatchClassifier.Stop();
             Debug.WriteLine($"Classifier Training Time: {stopwatchClassifier.ElapsedMilliseconds} ms");
         }
 
-        // ===========================
-        //      PREDICTION PHASE
-        // ===========================
+        /// <summary>
+        /// Performs image prediction and reconstruction using both HTM and KNN classifiers.
+        /// Compares the reconstructed images and generates similarity plots.
+        /// </summary>
+        /// <param name="sp">The Spatial Pooler used for encoding.</param>
+        /// <param name="activeArray">An array representing active columns in the Spatial Pooler.</param>
+        /// <param name="imgHeight">The height of the images.</param>
+        /// <param name="imgWidth">The width of the images.</param>
+        /// <param name="binarizedTestingImagePaths">A list of file paths to the binarized testing images.</param>
         public void PredictionAndReconstruction(SpatialPooler sp, int[] activeArray, int imgHeight, int imgWidth, List<string> binarizedTestingImagePaths)
         {
             Debug.WriteLine("Starting Prediction Phase...");
             Stopwatch stopwatchReconstruction = Stopwatch.StartNew();
+
+            // Directories for reconstructed images and similarity plots
             String outputReconstructedHTMFolder = ".\\ReconstructedHTM";
-            if (Directory.Exists(outputReconstructedHTMFolder)) Directory.Delete(outputReconstructedHTMFolder, true);
-            // Recreate the folder
-            Directory.CreateDirectory(outputReconstructedHTMFolder);
-
             String outputReconstructedKNNFolder = ".\\ReconstructedKNN";
-            if (Directory.Exists(outputReconstructedKNNFolder)) Directory.Delete(outputReconstructedKNNFolder, true);
-            // Recreate the folder
-            Directory.CreateDirectory(outputReconstructedKNNFolder);
-
             String htmSimilarityFolder = ".\\HTMSimilarityPlot";
-            if (Directory.Exists(htmSimilarityFolder)) Directory.Delete(htmSimilarityFolder, true);
-            // Recreate the folder
-            Directory.CreateDirectory(htmSimilarityFolder);
-
             String knnSimilarityFolder = ".\\KNNSimilarityPlot";
-            if (Directory.Exists(knnSimilarityFolder)) Directory.Delete(knnSimilarityFolder, true);
-            // Recreate the folder
-            Directory.CreateDirectory(knnSimilarityFolder);
+
+            // Delete existing directories and recreate them
+            foreach (var folder in new[] { outputReconstructedHTMFolder, outputReconstructedKNNFolder, htmSimilarityFolder, knnSimilarityFolder })
+            {
+                if (Directory.Exists(folder)) Directory.Delete(folder, true);
+                Directory.CreateDirectory(folder);
+            }
 
             // Instantiate the ImageReconstructor with required dimensions
             ImageReconstructor reconstructor = new ImageReconstructor(imgWidth, imgHeight);
@@ -310,46 +342,45 @@ namespace NeoCortexApiSample
 
                 Array.Clear(activeArray, 0, activeArray.Length);
 
-                sp.compute(inputVector, activeArray, false);  // false prevents SP from updating
+                // Compute active columns without learning
+                sp.compute(inputVector, activeArray, false);
 
                 var activeCols = ArrayUtils.IndexWhere(activeArray, (el) => el == 1);
                 var cells = activeCols.Select(index => new Cell { Index = index }).ToArray();
 
-                // Get predicted image by htm classifier
+                // Predict using HTM and KNN classifiers
                 var predictedImagesHTM = htmClassifier.GetPredictedInputValues(cells, 3);
-
-                // Get top predicted image SDRs from KNN Classifier
                 var predictedImagesKNN = knnClassifier.GetPredictedInputValues(cells, 3);
 
-                // Get the highest similarity prediction
+                // Get the highest similarity prediction for HTM
                 var bestPredictionHTM = predictedImagesHTM.OrderByDescending(p => p.Similarity).First();
                 Cell[] predictedHTMCells = bestPredictionHTM.SDR.Select(index => new Cell { Index = index }).ToArray();
-                Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput}\nHTM predictive cells similarity: {bestPredictionHTM.Similarity / 100:F2}\nSDR: [{string.Join(",", bestPredictionHTM.SDR)}]\n");
-                double similarityHTM = reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{bestPredictionHTM.PredictedInput}.txt", inputVector, bestPredictionHTM.PredictedInput);
+                Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput}\nHTM predictive cells similarity: {bestPredictionHTM.Similarity / 100:F2}\n" +
+                    $"SDR: [{string.Join(",", bestPredictionHTM.SDR)}]\n");
+                // Reconstruct and evaluate similarity for HTM
+                double similarityHTM = reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{bestPredictionHTM.PredictedInput}.txt",
+                    inputVector, bestPredictionHTM.PredictedInput);
                 Debug.WriteLine($"Similarity between HTM Reconstructed Image and Original Binarized image: {similarityHTM:F2}\n");
                 double bestPredictionSimilarityHTM = Math.Round(bestPredictionHTM.Similarity / 100.0, 2);
                 //Store the similarity value for HTM
-                htmSimilarities.Add(similarityHTM); // Store similarity value
+                htmSimilarities.Add(similarityHTM);
 
-
-                // Get the highest similarity prediction
+                // Get the highest similarity prediction for KNN
                 var bestPredictionKNN = predictedImagesKNN.OrderByDescending(p => p.Similarity).First();
                 Cell[] predictedKNNCells = bestPredictionKNN.SDR.Select(index => new Cell { Index = index }).ToArray();
-                Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput}\nKNN predictive cells similarity: {bestPredictionKNN.Similarity:F2}\nSDR: [{string.Join(",", bestPredictionKNN.SDR)}]\n");
-                double similarityKNN = reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{bestPredictionKNN.PredictedInput}.txt", inputVector, bestPredictionKNN.PredictedInput);
+                Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput}\nKNN predictive cells similarity: {bestPredictionKNN.Similarity:F2}\n" +
+                    $"SDR: [{string.Join(",", bestPredictionKNN.SDR)}]\n");
+                // Reconstruct and evaluate similarity for KNN
+                double similarityKNN = reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{bestPredictionKNN.PredictedInput}.txt",
+                    inputVector, bestPredictionKNN.PredictedInput);
                 Debug.WriteLine($"Similarity between KNN Reconstructed Image and Original Binarized image: {similarityKNN:F2}\n");
-                double bestPredictionSimilarityKNN = Math.Round(bestPredictionKNN.Similarity,2);
-                // Store similarity for KNN and debug
-                knnSimilarities.Add(similarityKNN); // Store similarity for KNN
-                Debug.WriteLine($"Storing KNN Similarity: {bestPredictionSimilarityKNN}, HTM Similarity: {bestPredictionSimilarityHTM}");
+                double bestPredictionSimilarityKNN = Math.Round(bestPredictionKNN.Similarity, 2);
+                // Store the similarity value for KNN 
+                knnSimilarities.Add(similarityKNN);
                 stopwatchReconstruction.Stop();
                 Debug.WriteLine($"Classifier Prediction and Reconstruction Time: {stopwatchReconstruction.ElapsedMilliseconds} ms");
-                
-                // ========================
-                //Comparison of Classifiers
-                //========================
-                //Add per - input comparison based on similarity
 
+                // Compare classifier performance
                 string betterClassifier = bestPredictionSimilarityKNN > bestPredictionSimilarityHTM
                     ? "KNN" : (bestPredictionSimilarityHTM > bestPredictionSimilarityKNN ? "HTM" : "Both classifiers performed equally");
 
@@ -362,30 +393,35 @@ namespace NeoCortexApiSample
                 {
                     Debug.WriteLine($"{betterClassifier} performed better for image with KNN similarity: {bestPredictionSimilarityKNN} and HTM similarity: {bestPredictionSimilarityHTM}");
                 }
+
                 Debug.WriteLine("Starting comparison of reconstructed images...");
+                // Compare reconstructed images
                 reconstructor.CompareReconstructedImages(outputReconstructedKNNFolder, outputReconstructedHTMFolder);
                 Debug.WriteLine("Comparison of reconstructed images completed.");
             }
-            // Generate the Similarity graph using the HTM Similarity list
+            // Generate the Similarity graph using the HTM & KNN Similarity list
             DrawSimilarityPlots(htmSimilarities, htmSimilarityFolder, "HTM Similarity Graph.png");
-            // Generate the Similarity graph using the KNN Similarity list
             DrawSimilarityPlots(knnSimilarities, knnSimilarityFolder, "KNN Similarity Graph.png");
+            // Generate the Similarity Scott Plot using the HTM & KNN Similarity list
             PlotReconstructionResults(htmSimilarities, "HTM Similarity Plot", htmSimilarityFolder);
             PlotReconstructionResults(knnSimilarities, "KNN Similarity Plot", knnSimilarityFolder);
 
             Debug.WriteLine($"Reconstruction Completed");
-
-            // ===========================
-            //    RESET CLASSIFIER
-            // ===========================
+            // Reset classifiers
             Debug.WriteLine("Resetting  both the Classifiers for Next Experiment...");
             htmClassifier.ClearState();
             knnClassifier.ClearState();
         }
-
+        /// <summary>
+        /// Generates and saves a reconstruction similarity plot using ScottPlot.
+        /// </summary>
+        /// <param name="similarities">A list of similarity values for reconstructed images.</param>
+        /// <param name="title">The title of the plot.</param>
+        /// <param name="folderPath">The directory where the plot image will be saved.</param>
         public void PlotReconstructionResults(List<double> similarities, string title, string folderPath)
         {
-            var plt = new ScottPlot.Plot(800, 600); // Define plot size
+            // Define plot size
+            var plt = new ScottPlot.Plot(800, 600);
 
             // Generate X values (index of each test image)
             double[] xValues = Enumerable.Range(0, similarities.Count).Select(i => (double)i).ToArray();
@@ -406,16 +442,21 @@ namespace NeoCortexApiSample
             Console.WriteLine($"Plot saved: {filePath}");
         }
 
+        /// <summary>
+        /// Generates and saves a combined similarity plot from multiple similarity lists.
+        /// </summary>
+        /// <param name="similaritiesList">A list containing multiple lists of similarity values.</param>
+        /// <param name="similarityFolder">The directory where the plot image will be saved.</param>
+        /// <param name="fileName">The name of the output image file.</param>
         public static void DrawSimilarityPlots(List<double> similaritiesList, string similarityFolder, string fileName)
         {
             // Combine all similarities from the list of arrays
-
             List<double> combinedSimilarities = new List<double>();
             foreach (var similarities in similaritiesList)
-
             {
                 combinedSimilarities.AddRange(similarities);
             }
+
             // Define the file path with the folder path and file name
             string filePath = Path.Combine(similarityFolder, fileName);
 
