@@ -18,7 +18,8 @@ namespace NeoCortexApiSample
 {
     public class ImageBinarizerSpatialPattern
     {
-        public string inputPrefix { get; private set; }
+        //Accessing the Image Folder form the Cureent Directory
+        string trainingFolder = "Sample\\TestFiles";
         private IClassifier<Cell, string> htmClassifier;
         private IClassifier<Cell, string> knnClassifier;
         public ImageBinarizerSpatialPattern()
@@ -29,14 +30,22 @@ namespace NeoCortexApiSample
 
         }
 
+        public class BinarizedImagesResult
+        {
+            public string[] ActualImages { get; set; }
+            public Dictionary<string, Cell[]> TrainingImagesSDRs { get; set; }
+            public Dictionary<string, string> BinarizedTrainingToActualMap { get; set; }
+            public Dictionary<string, string> BinarizedTestToActualMap { get; set; }
+            public List<string> BinarizedTrainingImagePaths { get; set; }
+            public List<string> BinarizedTestingImagePaths { get; set; }
+        }
+
         /// <summary>
         /// Implements an experiment that demonstrates how to learn spatial patterns.
         /// SP will learn every presented Image input in multiple iterations.
         /// </summary>
         public void Run()
         {
-            Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(ImageBinarizerSpatialPattern)}");
-
             double minOctOverlapCycles = 1.0;
             double maxBoost = 5.0;
             // We will build a slice of the cortex with the given number of mini-columns
@@ -66,30 +75,15 @@ namespace NeoCortexApiSample
                 Random = new ThreadSafeRandom(42),
                 StimulusThreshold = 10,
             };
-
-            //Runnig the Experiment
-            var sp = RunExperiment(cfg, inputPrefix);
-            //Runing the Reconstruction Method Experiment
-            //RunRustructuringExperiment(sp);
-
+            // Call binarizeImage() to process and return images
+            var binarizedResult = binarizeImage(trainingFolder);
+            // Pass binarized images to Spatial Pooler
+            var sp = RunExperiment(cfg, imgHeight, imgWidth, binarizedResult);
         }
-
-        /// <summary>
-        /// Implements the experiment.
-        /// </summary>
-        /// <param name="cfg"></param>
-        /// <param name="inputPrefix"> The name of the images</param>
-        /// <returns>The trained bersion of the SP.</returns>
-        public SpatialPooler RunExperiment(HtmConfig cfg, string inputPrefix)
+        public BinarizedImagesResult binarizeImage(string trainingFolder)
         {
-            var mem = new Connections(cfg);
-            bool isInStableState = false;
-            int numColumns = 64 * 64;
-
-            //Accessing the Image Folder form the Cureent Directory
-            string trainingFolder = "Sample\\TestFiles";
             //Accessing the Image Folder form the Cureent Directory Folder
-            var actualImages = Directory.EnumerateFiles(trainingFolder).Where(file => file.StartsWith($"{trainingFolder}\\{inputPrefix}") &&
+            var actualImages = Directory.EnumerateFiles(trainingFolder).Where(file => file.StartsWith($"{trainingFolder}") &&
             (file.EndsWith(".jpeg") || file.EndsWith(".jpg") || file.EndsWith(".png"))).ToArray();
 
             // Shuffle to ensure randomness
@@ -152,8 +146,29 @@ namespace NeoCortexApiSample
             }
             Debug.WriteLine("All images are binarized");
 
+            return new BinarizedImagesResult
+            {
+                ActualImages = actualImages,
+                TrainingImagesSDRs = trainingImagesSDRs,
+                BinarizedTrainingToActualMap = binarizedTrainingToActualMap,
+                BinarizedTestToActualMap = binarizedTestToActualMap,
+                BinarizedTrainingImagePaths = binarizedTrainingImagePaths,
+                BinarizedTestingImagePaths = binarizedTestingImagePaths
+            };
+        }
 
-            HomeostaticPlasticityController hpa = new HomeostaticPlasticityController(mem, actualImages.Length * 50, (isStable, numPatterns, actColAvg, seenInputs) =>
+        /// <summary>
+        /// Implements the experiment.
+        /// </summary>
+        /// <param name="cfg"></param>
+        /// <returns>The trained bersion of the SP.</returns>
+        public SpatialPooler RunExperiment(HtmConfig cfg, int imgHeight, int imgWidth, BinarizedImagesResult binarizedResult)
+        {
+            var mem = new Connections(cfg);
+            bool isInStableState = false;
+            int numColumns = 64 * 64;
+
+            HomeostaticPlasticityController hpa = new HomeostaticPlasticityController(mem, binarizedResult.ActualImages.Length * 50, (isStable, numPatterns, actColAvg, seenInputs) =>
             {
                 // Event should only be fired when entering the stable state.
                 if (isStable)
@@ -175,10 +190,6 @@ namespace NeoCortexApiSample
 
             //Initializing the Spatial Pooler Algorithm
             sp.Init(mem, new DistributedMemory() { ColumnDictionary = new InMemoryDistributedDictionary<int, NeoCortexApi.Entities.Column>(1) });
-            //It creates the instance of HTMClassifier
-            // HtmClassifier<string, ComputeCycle> htmClassifier = new HtmClassifier<string, ComputeCycle>();
-            //It creates the instance of KNNClassifier
-            // var knnClassifier = new KNeighborsClassifier<string, ComputeCycle>();
 
             int[] activeArray = new int[numColumns];
 
@@ -192,7 +203,7 @@ namespace NeoCortexApiSample
             Stopwatch stopwatchSp = Stopwatch.StartNew();
             while (currentCycle < maxCycles)
             {
-                foreach (var binarizedImagePath in binarizedTrainingImagePaths)
+                foreach (var binarizedImagePath in binarizedResult.BinarizedTrainingImagePaths)
                 {
                     // Read Binarized and Encoded input CSV file into an array
                     int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
@@ -206,8 +217,8 @@ namespace NeoCortexApiSample
                     string binarizedKey = Path.GetFileNameWithoutExtension(binarizedImagePath);
 
                     // Store SDR representation mapped to the actual image for later training
-                    string trainingImageKey = binarizedTrainingToActualMap[binarizedKey];
-                    trainingImagesSDRs[trainingImageKey] = cells;
+                    string trainingImageKey = binarizedResult.BinarizedTrainingToActualMap[binarizedKey];
+                    binarizedResult.TrainingImagesSDRs[trainingImageKey] = cells;
 
                     Debug.WriteLine($"Cycle: {currentCycle} - Image-Input: {trainingImageKey}");
                     Debug.WriteLine($"INPUT :{Helpers.StringifyVector(inputVector)}");
@@ -231,8 +242,10 @@ namespace NeoCortexApiSample
             Debug.WriteLine("It has reached the stable stage\n");
             stopwatchSp.Stop();
             Debug.WriteLine($"\nSpatial Pooler Training Time: {stopwatchSp.ElapsedMilliseconds} ms");
-            ClassifierTraining(trainingImagesSDRs);
-            this.PredictionAndReconstruction(sp, activeArray, imgHeight, imgWidth, binarizedTestingImagePaths);
+            // Train the Classifiers with the Training images SDR
+            ClassifierTraining(binarizedResult.TrainingImagesSDRs);
+            // Predict the Training Image based on similarity between the Training and Testing Images
+            PredictionAndReconstruction(sp, activeArray, imgHeight, imgWidth, binarizedResult.BinarizedTestingImagePaths);
             return sp;
         }
         // ===========================
