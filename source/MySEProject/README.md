@@ -28,7 +28,7 @@ existing classifiers, Htm and KNN, the project seeks to evaluate their functiona
 performance, and differences. Inspired by the SpatialLearning experiment, a new experiment will be
 implemented to regenerate input images from SDRs produced by the Spatial Pooler (SP), leveraging
 the IClassifier interface for learning and prediction. The experiment will use the ImageEncoder to
-process images, reconstruct inputs via classifiers, and compare them with the originals using
+process images, predict and reconstruct inputs via classifiers, and compare them with the originals using
 similarity measures. Results will be illustrated with diagrams, analysed quantitatively, and discussed,
 providing insights into the reconstruction capabilities of classifiers.
 
@@ -54,7 +54,6 @@ image-based experiments, such as learning spatial patterns or regenerating input
 - **Binary Conversion** : Binarized images are converted into a binary array (inputVector) for processing with the NeoCortex framework.
 - **Spatial Pooling** : The binary input vector is processed using the Spatial Pooler to generate Sparse Distributed Representations (SDRs), identifying active columns.
 - **Labeling and Storage** : SDRs are labeled with image names and stored for training and prediction in downstream tasks like classification.
-- **Visualization** : Similarity plots are generated for analysis of the encoding process.
 
 ### Sparse Distributed Representations (SDR):
 
@@ -129,7 +128,7 @@ The reconstruction process regenerates an image representation from its Sparse D
 - **5. htmClassifier.cs/knnClassifer.cs/IClassifier.cs** - These classes implements the classifiers, htmClassifier and knnClassifier, for image pattern recognition using Sparse Distributed Representations (SDRs) from the NeoCortex API. Both classifiers adhere to the IClassifier interface, which defines methods for learning input patterns, predicting future inputs, clearing internal state, and reconstructing inputs from predictions.
 
 ### Project Findings
-This project aims to deploy the Reconstruct and Similarity functionalities between the images and classifiers.
+This project focuses on implementing image prediction and reconstruction along with similarity analysis using HTM and KNN classifiers.
 
 - The resultant Comparisons of similarities(Jaccard Index) of the Original Binarized image and the reconstructed image for both the classifier. The result is also plotted with a Scott Plot and Bar Graph for visualisation.
 - The resultant Comparion of performance of both the Classifier to understand the which classifer performs better.  
