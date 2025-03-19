@@ -358,9 +358,9 @@ namespace NeoCortexApiSample
                 Debug.WriteLine($"Predicted Image by HTM Classifier: {bestPredictionHTM.PredictedInput}\nHTM predictive cells similarity: {bestPredictionHTM.Similarity / 100:F2}\n" +
                     $"SDR: [{string.Join(",", bestPredictionHTM.SDR)}]\n");
                 // Reconstruct and evaluate similarity for HTM
-                double similarityHTM = reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{bestPredictionHTM.PredictedInput}.txt",
+                var (similarityHTM, reconstructedHTMPath) = reconstructor.ReconstructAndSave(sp, predictedHTMCells, outputReconstructedHTMFolder, $"HTM_reconstructed_{bestPredictionHTM.PredictedInput}.txt",
                     inputVector, bestPredictionHTM.PredictedInput);
-                Debug.WriteLine($"Similarity between HTM Reconstructed Image and Original Binarized image: {similarityHTM:F2}\n");
+                Debug.WriteLine($"Similarity between HTM Reconstructed Image and Original Binarized Image: {similarityHTM:F2}\n");
                 double bestPredictionSimilarityHTM = Math.Round(bestPredictionHTM.Similarity / 100.0, 2);
                 //Store the similarity value for HTM
                 htmSimilarities.Add(similarityHTM);
@@ -371,9 +371,9 @@ namespace NeoCortexApiSample
                 Debug.WriteLine($"Predicted Image by KNN Classifier: {bestPredictionKNN.PredictedInput}\nKNN predictive cells similarity: {bestPredictionKNN.Similarity:F2}\n" +
                     $"SDR: [{string.Join(",", bestPredictionKNN.SDR)}]\n");
                 // Reconstruct and evaluate similarity for KNN
-                double similarityKNN = reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{bestPredictionKNN.PredictedInput}.txt",
+                var (similarityKNN, reconstructedKNNPath) = reconstructor.ReconstructAndSave(sp, predictedKNNCells, outputReconstructedKNNFolder, $"KNN_reconstructed_{bestPredictionKNN.PredictedInput}.txt",
                     inputVector, bestPredictionKNN.PredictedInput);
-                Debug.WriteLine($"Similarity between KNN Reconstructed Image and Original Binarized image: {similarityKNN:F2}\n");
+                Debug.WriteLine($"Similarity between KNN Reconstructed Image and Original Binarized Image: {similarityKNN:F2}\n");
                 double bestPredictionSimilarityKNN = Math.Round(bestPredictionKNN.Similarity, 2);
                 // Store the similarity value for KNN 
                 knnSimilarities.Add(similarityKNN);
@@ -387,28 +387,28 @@ namespace NeoCortexApiSample
                 // Output which classifier performed better or if both were equal
                 if (betterClassifier == "Both classifiers performed equally")
                 {
-                    Debug.WriteLine($"Both classifiers performed equally for image with KNN similarity: {bestPredictionSimilarityKNN} and HTM similarity: {bestPredictionSimilarityHTM}");
+                    Debug.WriteLine($"Both classifiers performed equally for this Test Image with HTM internal similarity: {bestPredictionSimilarityHTM} and  KNN internal similarity: {bestPredictionSimilarityKNN}");
                 }
                 else
                 {
-                    Debug.WriteLine($"{betterClassifier} performed better for image with KNN similarity: {bestPredictionSimilarityKNN} and HTM similarity: {bestPredictionSimilarityHTM}");
+                    Debug.WriteLine($"{betterClassifier} performed better for this Test Image with HTM internal similarity: {bestPredictionSimilarityHTM} and KNN internal similarity: {bestPredictionSimilarityKNN}");
                 }
 
                 Debug.WriteLine("Starting comparison of reconstructed images...");
                 // Compare reconstructed images
-                reconstructor.CompareReconstructedImages(outputReconstructedKNNFolder, outputReconstructedHTMFolder);
-                Debug.WriteLine("Comparison of reconstructed images completed.");
+                reconstructor.CompareReconstructedImages(reconstructedHTMPath, reconstructedKNNPath);
+                Debug.WriteLine("Comparison of reconstructed images completed.\n");
             }
             // Generate the Similarity graph using the HTM & KNN Similarity list
-            DrawSimilarityPlots(htmSimilarities, htmSimilarityFolder, "HTM Similarity Graph.png");
-            DrawSimilarityPlots(knnSimilarities, knnSimilarityFolder, "KNN Similarity Graph.png");
+            DrawSimilarityGraph(htmSimilarities, htmSimilarityFolder, "HTM Similarity Graph.png", "HTM");
+            DrawSimilarityGraph(knnSimilarities, knnSimilarityFolder, "KNN Similarity Graph.png", "KNN");
             // Generate the Similarity Scott Plot using the HTM & KNN Similarity list
             PlotReconstructionResults(htmSimilarities, "HTM Similarity Plot", htmSimilarityFolder);
             PlotReconstructionResults(knnSimilarities, "KNN Similarity Plot", knnSimilarityFolder);
 
             Debug.WriteLine($"Reconstruction Completed");
             // Reset classifiers
-            Debug.WriteLine("Resetting  both the Classifiers for Next Experiment...");
+            Debug.WriteLine("Resetting both the Classifiers for Next Experiment...");
             htmClassifier.ClearState();
             knnClassifier.ClearState();
         }
@@ -439,7 +439,7 @@ namespace NeoCortexApiSample
             string filePath = Path.Combine(folderPath, $"{title.Replace(" ", "_")}.png");
             plt.SaveFig(filePath);
 
-            Console.WriteLine($"Plot saved: {filePath}");
+            Debug.WriteLine($"{title} saved: {filePath}");
         }
 
         /// <summary>
@@ -448,7 +448,7 @@ namespace NeoCortexApiSample
         /// <param name="similaritiesList">A list containing multiple lists of similarity values.</param>
         /// <param name="similarityFolder">The directory where the plot image will be saved.</param>
         /// <param name="fileName">The name of the output image file.</param>
-        public static void DrawSimilarityPlots(List<double> similaritiesList, string similarityFolder, string fileName)
+        public static void DrawSimilarityGraph(List<double> similaritiesList, string similarityFolder, string fileName, string title)
         {
             // Combine all similarities from the list of arrays
             List<double> combinedSimilarities = new List<double>();
@@ -463,7 +463,7 @@ namespace NeoCortexApiSample
             // Draw the combined similarity plot
             NeoCortexUtils.DrawCombinedSimilarityPlot(combinedSimilarities, filePath, 1000, 850);
 
-            Debug.WriteLine($"Combined similarity plot generated and saved successfully.");
+            Debug.WriteLine($"Combined similarity Graph of {title} is generated and saved successfully.");
 
         }
     }

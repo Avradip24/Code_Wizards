@@ -12,18 +12,41 @@ using NeoCortex;
 
 namespace NeoCortexApiSample
 {
+    /// <summary>
+    /// The ImageReconstructor class is responsible for reconstructing images from predicted cell activity
+    /// using the Spatial Pooler (SP) and evaluating the quality of reconstruction through similarity measures.
+    /// </summary>
     public class ImageReconstructor
     {
         private int imgWidth;
         private int imgHeight;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageReconstructor"/> class.
+        /// </summary>
+        /// <param name="imgWidth">Width of the image in pixels.</param>
+        /// <param name="imgHeight">Height of the image in pixels.</param>
         public ImageReconstructor(int imgWidth, int imgHeight)
         {
             this.imgWidth = imgWidth;
             this.imgHeight = imgHeight;
         }
-
-        public double ReconstructAndSave(SpatialPooler sp, Cell[] predictedCells, string outputFolder, string fileName, int[] inputVector, string binarizedImage)
+        /// <summary>
+        /// Reconstructs an image from predicted active cells and saves it as a text file.
+        /// Also computes the similarity between the reconstructed image and the original binarized image.
+        /// </summary>
+        /// <param name="sp">The Spatial Pooler used for reconstruction.</param>
+        /// <param name="predictedCells">Array of predicted cells.</param>
+        /// <param name="outputFolder">The folder where the reconstructed image file will be saved.</param>
+        /// <param name="fileName">Name of the output file for the reconstructed image.</param>
+        /// <param name="inputVector">Original input vector used for encoding the image.</param>
+        /// <param name="binarizedImage">The name of the binarized image used for comparison.</param>
+        /// <returns>
+        /// A tuple containing:
+        /// - <see cref="double"/>: Jaccard similarity between the reconstructed image and the binarized image.
+        /// - <see cref="string"/>: The name of the reconstructed image file.
+        /// </returns>
+        public (double, String) ReconstructAndSave(SpatialPooler sp, Cell[] predictedCells, string outputFolder, string fileName, int[] inputVector, string binarizedImage)
         {
             var predictedCols = predictedCells.Select(c => c.Index).Distinct().ToArray();
             // Create a new dictionary to store extended probabilities
@@ -67,7 +90,7 @@ namespace NeoCortexApiSample
             string[] imageName = recontructedImage.Split(' ');
             // Extract the last two words
             string recontructedImageName = imageName.Length >= 2 ? $"{imageName[^2]} {imageName[^1]}" : recontructedImage;
-            Debug.WriteLine($"Reconstructed Image Saved as  {recontructedImageName}");
+            Debug.WriteLine($"Reconstructed Image Saved as {recontructedImageName}");
             int[] reconstructedVectorHTM = NeoCortexUtils.ReadCsvIntegers(reconstructedTxtPath).ToArray();
             string binarizedFolder = ".\\BinarizedImages";
             string binarizedImageName = $"{binarizedImage}Training_Binarized.txt";
@@ -76,43 +99,30 @@ namespace NeoCortexApiSample
             int[] binarizedInputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
             // *Calculate Similarity*
             var similarity = MathHelpers.JaccardSimilarityofBinaryArrays(binarizedInputVector, reconstructedVectorHTM);
-            return similarity;
+            return (similarity, reconstructedTxtPath);
         }
-        public void CompareReconstructedImages(string knnFolder, string htmFolder)
+
+        /// <summary>
+        /// Compares two reconstructed images (from KNN and HTM classifiers) by computing their Jaccard similarity
+        /// if the predictions are different. If the classifiers predict the same image, similarity calculation is skipped.
+        /// </summary>
+        /// <param name="knnFilePath">File path of the reconstructed image from the KNN classifier.</param>
+        /// <param name="htmFilePath">File path of the reconstructed image from the HTM classifier.</param>
+        public void CompareReconstructedImages(string htmFilePath, string knnFilePath)
         {
-            // Get all files from both directories
-            var knnFiles = Directory.GetFiles(knnFolder, "*.txt")
-                                    .Select(f => Path.GetFileNameWithoutExtension(f).Replace("KNN_reconstructed_", "")).ToList();
+            // Extract image names from file names
+            string knnImageName = Path.GetFileNameWithoutExtension(knnFilePath).Replace("KNN_reconstructed_", "");
+            string htmImageName = Path.GetFileNameWithoutExtension(htmFilePath).Replace("HTM_reconstructed_", "");
 
-            var htmFiles = Directory.GetFiles(htmFolder, "*.txt")
-                                    .Select(f => Path.GetFileNameWithoutExtension(f).Replace("HTM_reconstructed_", "")).ToList();
+            // Read binary vectors from files
+            int[] knnVector = NeoCortexUtils.ReadCsvIntegers(knnFilePath).ToArray();
+            int[] htmVector = NeoCortexUtils.ReadCsvIntegers(htmFilePath).ToArray();
 
-           
+            // Compute Jaccard Similarity
+            double similarity = MathHelpers.JaccardSimilarityofBinaryArrays(knnVector, htmVector);
 
-            // Find common images in both folders
-            var commonImages = knnFiles.Intersect(htmFiles).ToList();
-
-            if (!commonImages.Any())
-            {
-                Debug.WriteLine("Both the classifiers predicted different images, hence ignoring comparing reconstructed images");
-                return;
-            }
-
-            foreach (var imageName in commonImages)
-            {
-                string knnImagePath = Path.Combine(knnFolder, $"KNN_reconstructed_{imageName}.txt");
-                string htmImagePath = Path.Combine(htmFolder, $"HTM_reconstructed_{imageName}.txt");
-
-                // Read binary vectors from files
-                int[] knnVector = NeoCortexUtils.ReadCsvIntegers(knnImagePath).ToArray();
-                int[] htmVector = NeoCortexUtils.ReadCsvIntegers(htmImagePath).ToArray();
-
-                // Compute Jaccard Similarity
-                double similarity = MathHelpers.JaccardSimilarityofBinaryArrays(knnVector, htmVector);
-
-                // Print similarity to debug window
-                Debug.WriteLine($"Similarity between {imageName} (KNN vs HTM): {similarity:F2}");
-            }
+            // Print similarity to debug window
+            Debug.WriteLine($"Similarity between HTM ({htmImageName}) and KNN ({knnImageName}): {similarity:F2}");
         }
     }
 }
