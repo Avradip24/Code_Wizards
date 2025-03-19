@@ -7,7 +7,7 @@ using System.IO;
 
 namespace NeoCortexApiSample
 {
-    internal class ImageBinarizationUtils
+    public class ImageBinarizationUtils
     {
         /// <summary>
         /// Converts an image to a binarized format and saves it as a .txt file.
