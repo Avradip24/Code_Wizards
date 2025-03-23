@@ -18,19 +18,6 @@ namespace NeoCortexApiSample
     /// </summary>
     public class ImageReconstructor
     {
-        private int imgWidth;
-        private int imgHeight;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImageReconstructor"/> class.
-        /// </summary>
-        /// <param name="imgWidth">Width of the image in pixels.</param>
-        /// <param name="imgHeight">Height of the image in pixels.</param>
-        public ImageReconstructor(int imgWidth, int imgHeight)
-        {
-            this.imgWidth = imgWidth;
-            this.imgHeight = imgHeight;
-        }
         /// <summary>
         /// Reconstructs an image from predicted active cells and saves it as a text file.
         /// Also computes the similarity between the reconstructed image and the original binarized image.
@@ -43,10 +30,11 @@ namespace NeoCortexApiSample
         /// <param name="binarizedImage">The name of the binarized image used for comparison.</param>
         /// <returns>
         /// A tuple containing:
-        /// - <see cref="double"/>: Jaccard similarity between the reconstructed image and the binarized image.
+        /// - <see cref="double"/>: Jaccard similarity between the reconstructed image and the original binarized image.
+        /// - <see cref="double"/>: Hamming Distance similarity between the reconstructed image and the original binarized image.
         /// - <see cref="string"/>: The name of the reconstructed image file.
         /// </returns>
-        public (double, String) ReconstructAndSave(SpatialPooler sp, Cell[] predictedCells, string outputFolder, string fileName, int[] inputVector, string binarizedImage)
+        public static (double, double, String) ReconstructAndSave(int imgHeight, int imgWidth, SpatialPooler sp, Cell[] predictedCells, string outputFolder, string fileName, int[] inputVector, string binarizedImage)
         {
             var predictedCols = predictedCells.Select(c => c.Index).Distinct().ToArray();
             // Create a new dictionary to store extended probabilities
@@ -97,9 +85,10 @@ namespace NeoCortexApiSample
             string binarizedImagePath = Path.Combine(binarizedFolder, binarizedImageName);
             // Read Binarized and Encoded input CSV file into an array
             int[] binarizedInputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
-            // *Calculate Similarity*
-            var similarity = MathHelpers.JaccardSimilarityofBinaryArrays(binarizedInputVector, reconstructedVectorHTM);
-            return (similarity, reconstructedTxtPath);
+            // Calculate Similarity
+            var jacSimilarity = MathHelpers.JaccardSimilarityofBinaryArrays(binarizedInputVector, reconstructedVectorHTM);
+            var hamSimilarity = MathHelpers.GetHammingDistance(binarizedInputVector, reconstructedVectorHTM);
+            return (jacSimilarity, hamSimilarity, reconstructedTxtPath);
         }
 
         /// <summary>
@@ -108,7 +97,7 @@ namespace NeoCortexApiSample
         /// </summary>
         /// <param name="knnFilePath">File path of the reconstructed image from the KNN classifier.</param>
         /// <param name="htmFilePath">File path of the reconstructed image from the HTM classifier.</param>
-        public void CompareReconstructedImages(string htmFilePath, string knnFilePath)
+        public static void CompareReconstructedImages(string htmFilePath, string knnFilePath, Action<string> logger = null)
         {
             // Extract image names from file names
             string knnImageName = Path.GetFileNameWithoutExtension(knnFilePath).Replace("KNN_reconstructed_", "");
@@ -121,8 +110,13 @@ namespace NeoCortexApiSample
             // Compute Jaccard Similarity
             double similarity = MathHelpers.JaccardSimilarityofBinaryArrays(knnVector, htmVector);
 
-            // Print similarity to debug window
-            Debug.WriteLine($"Similarity between HTM ({htmImageName}) and KNN ({knnImageName}): {similarity:F2}");
+            // Create the log message
+            string message = $"Similarity between HTM ({htmImageName}) and KNN ({knnImageName}): {similarity:F2}";
+
+            // Print to Debug window + Pass to logger if provided
+            Debug.WriteLine(message);
+            // Call the mock logger if it's passed in
+            logger?.Invoke(message); 
         }
     }
 }
