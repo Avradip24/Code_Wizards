@@ -33,7 +33,8 @@ providing insights into the reconstruction capabilities of classifiers.
 This project explores the integration and application of classifiers within the Hierarchical Temporal Memory (HTM) framework to regenerate input data from Sparse Distributed Representations (SDRs). The core goal is to understand the role of classifiers in reverse encoding, where the learned SDR representations are used to reconstruct the original input. Through this process, we aim to analyse the behaviour and performance of two existing classifiers— Htm and KNN to implement a new experiment that leverages their capabilities. The two classifiers under study in this project—HTMClassifier and KNN—serve as foundational implementations. The HTMClassifier leverages the principles of temporal memory within HTM, while the KNN classifier employs a distance-based approach to classify SDRs based on nearest neighbours. Through this investigation, the project bridges the gap between abstract HTM theories and practical applications, contributing to advancements in intelligent systems and neural computation.
 
 ### The Overview of the Project:
-![Copy of Copy of Untitled presentation](https://github.com/user-attachments/assets/224f852d-f240-4f4b-8954-3b9e31eec1ed)
+
+![Overview of the Project (2)](https://github.com/user-attachments/assets/7bed04c0-6e72-47c7-819b-4f7028373367)
 
 ### Image Encoder:
 The ImageEncoder plays a crucial role in preparing image data for processing within Hierarchical
