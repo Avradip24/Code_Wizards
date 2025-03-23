@@ -407,7 +407,7 @@ namespace NeoCortexApiSample
             // Generate the Similarity graph using the HTM & KNN Jaccard Similarity list
             DrawSimilarityGraph(htmJacSimilarities, htmSimilarityFolder, "HTM Similarity Graph.png", "HTM");
             DrawSimilarityGraph(knnJacSimilarities, knnSimilarityFolder, "KNN Similarity Graph.png", "KNN");
-            // Generate the Similarity Scott Plot using the HTM & KNN Array Similarity list
+            // Generate the Similarity Scott Plot using the HTM & KNN Hamming Distance Similarity list
             PlotReconstructionResults(htmHamSimilarities, "HTM Similarity Plot", htmSimilarityFolder);
             PlotReconstructionResults(knnHamSimilarities, "KNN Similarity Plot", knnSimilarityFolder);
 
