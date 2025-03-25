@@ -1,4 +1,5 @@
 ﻿using NeoCortexApiSample;
+using SkiaSharp;
 
 namespace TestNeoCortexApiSample
 {
@@ -16,13 +17,17 @@ namespace TestNeoCortexApiSample
             if (!Directory.Exists(outputDirectory))
                 Directory.CreateDirectory(outputDirectory);
 
-            // Ensure a real test image exists (use an actual image file if possible)
-            if (!File.Exists(testImagePath))
+            // Create a 64x64 image with a black background
+            using (var surface = SKSurface.Create(new SKImageInfo(64, 64)))
             {
-                // Create a placeholder black image (64x64 PNG)
-                using (var bmp = new System.Drawing.Bitmap(64, 64))
+                var canvas = surface.Canvas;
+                canvas.Clear(SKColors.Black); // Fill with black
+
+                using (var image = surface.Snapshot())
+                using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
+                using (var stream = File.OpenWrite(testImagePath))
                 {
-                    bmp.Save(testImagePath, System.Drawing.Imaging.ImageFormat.Png);
+                    data.SaveTo(stream);
                 }
             }
         }
