@@ -116,4 +116,42 @@ public class TestImageReconstructor
         if (Directory.Exists(testBinarizedFolder))
             Directory.Delete(testBinarizedFolder, true);
     }
+
+    [TestMethod]
+    public void CompareReconstructedImages()
+    {
+        string testCompareHTMFile;
+        string testCompareKNNFile;
+        string testCompareOutputFolder = "TestCompareReconstructedOutput";
+        // Ensure the output directory exists
+        if (!Directory.Exists(testCompareOutputFolder))
+            Directory.CreateDirectory(testCompareOutputFolder);
+        // Create dummy HTM and KNN reconstructed files
+        testCompareHTMFile = Path.Combine(testCompareOutputFolder, "HTM_Reconstructed_testImage.txt");
+        testCompareKNNFile = Path.Combine(testCompareOutputFolder, "KNN_Reconstructed_testImage.txt");
+        string pattern = "01101100"; // The repeating binary pattern
+
+        // Generate a row that matches imgWidth
+        string row = string.Concat(Enumerable.Repeat(pattern, (imgWidth / pattern.Length) + 1))
+                           .Substring(0, imgWidth); // Ensure exact width
+
+        // Generate the grid with imgHeight rows
+        string[] grid = Enumerable.Repeat(row, imgHeight).ToArray();
+        File.WriteAllLines(testCompareHTMFile, grid);
+        File.WriteAllLines(testCompareKNNFile, grid);
+
+        // Capture log messages using a List<string>
+        List<string> logMessages = new List<string>();
+
+        // Run the method with a custom logger
+        ImageReconstructor.CompareReconstructedImages(testCompareHTMFile, testCompareKNNFile, logMessages.Add);
+
+        // Verify that similarity output is logged
+        Assert.IsTrue(logMessages.Count > 0, "No log messages captured.");
+        Assert.IsTrue(logMessages[0].Contains("Similarity between HTM"), "Expected log message format not found.");
+
+
+        if (Directory.Exists(testCompareOutputFolder))
+            Directory.Delete(testCompareOutputFolder, true);
+    }
 }
