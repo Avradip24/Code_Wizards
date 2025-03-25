@@ -1,20 +1,5 @@
-using ExcelDataReader;
-using NeoCortexApi;
-using NeoCortexApi.Encoders;
-using NeoCortexApi.Entities;
-using Newtonsoft.Json.Linq;
-using OfficeOpenXml.FormulaParsing.LexicalAnalysis;
-using Org.BouncyCastle.Ocsp;
 using System;
-using System.Buffers;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Xml;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace NeoCortexApiSample
 {

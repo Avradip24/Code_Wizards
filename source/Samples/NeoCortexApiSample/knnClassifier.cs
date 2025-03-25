@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Classifiers;
-using NeoCortexApiSample;
 
 namespace NeoCortexApiSample
 {
@@ -13,7 +11,7 @@ namespace NeoCortexApiSample
      public class KnnImageClassifier : IClassifier<Cell, string>
     {
         // k-NN classifier instance for mapping ComputeCycle objects to string labels
-        private readonly KNeighborsClassifier<string, ComputeCycle> _knnClassifier = new KNeighborsClassifier<string, ComputeCycle>();
+        private readonly KNeighborsClassifier<string, ComputeCycle> KnnClassifier = new KNeighborsClassifier<string, ComputeCycle>();
 
         /// <summary>
         /// Trains the classifier by associating a label (key) with active cells.
@@ -22,7 +20,7 @@ namespace NeoCortexApiSample
         /// <param name="activeCells">Array of active cells representing the learned pattern.</param>
         public void Learn(string key, Cell[] activeCells)
         {
-            _knnClassifier.Learn(key, activeCells);
+            KnnClassifier.Learn(key, activeCells);
         }
 
         /// <summary>
@@ -33,7 +31,7 @@ namespace NeoCortexApiSample
         /// <returns>List of predicted results with similarity scores and SDR representations.</returns>
         public List<PredictedResult<string>> GetPredictedInputValues(Cell[] predictiveCells, int k)
         {
-            var predictions = _knnClassifier.GetPredictedInputValues(predictiveCells, (short)k);
+            var predictions = KnnClassifier.GetPredictedInputValues(predictiveCells, (short)k);
             // Convert and return predictions as a list of PredictedResult<string> objects
             return predictions.Select(p => new PredictedResult<string>
             {
@@ -49,7 +47,7 @@ namespace NeoCortexApiSample
         // Clears the stored learned data in the classifier
         public void ClearState()
         {
-            _knnClassifier.ClearState();
+            KnnClassifier.ClearState();
         }
 
         /// <summary>

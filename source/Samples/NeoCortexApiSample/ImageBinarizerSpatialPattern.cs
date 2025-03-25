@@ -7,12 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using NeoCortexApi.Classifiers;
-using Daenet.ImageBinarizerLib.Entities;
-using Daenet.ImageBinarizerLib;
-using NeoCortexEntities.NeuroVisualizer;
-using Newtonsoft.Json.Linq;
-using GridCell.js;
 
 namespace NeoCortexApiSample
 {
@@ -337,6 +331,11 @@ namespace NeoCortexApiSample
             List<double> htmHamSimilarities = new List<double>();
             List<double> knnHamSimilarities = new List<double>();
 
+            // Initialize counters for classifier performance tracking
+            int htmPerformance = 0;
+            int knnPerformance = 0;
+            int ties = 0;
+
             foreach (var binarizedImagePath in binarizedTestingImagePaths)
             {
                 int[] inputVector = NeoCortexUtils.ReadCsvIntegers(binarizedImagePath).ToArray();
@@ -385,6 +384,20 @@ namespace NeoCortexApiSample
                 stopwatchReconstruction.Stop();
                 Debug.WriteLine($"Classifier Prediction and Reconstruction Time: {stopwatchReconstruction.ElapsedMilliseconds} ms");
 
+                // Compare classifier performance for this test image
+                if (bestPredictionSimilarityHTM > bestPredictionSimilarityKNN)
+                {
+                    htmPerformance++;
+                }
+                else if (bestPredictionSimilarityKNN > bestPredictionSimilarityHTM)
+                {
+                    knnPerformance++;
+                }
+                else
+                {
+                    ties++;
+                }
+
                 // Compare classifier performance
                 string betterClassifier = bestPredictionSimilarityKNN > bestPredictionSimilarityHTM
                     ? "KNN" : (bestPredictionSimilarityHTM > bestPredictionSimilarityKNN ? "HTM" : "Both classifiers performed equally");
@@ -412,6 +425,16 @@ namespace NeoCortexApiSample
             PlotReconstructionResults(knnHamSimilarities, "KNN Similarity Plot", knnSimilarityFolder);
 
             Debug.WriteLine($"Reconstruction Completed");
+
+            // *Overall Performance Summary*
+            string overallBetterClassifier = htmPerformance > knnPerformance
+                ? "HTM"
+                : (knnPerformance > htmPerformance ? "KNN" : "Both classifiers performed equally");
+
+            Debug.WriteLine($"\n=== Overall Classifier Performance Summary ===");
+            Debug.WriteLine($"HTM Performed better in {htmPerformance} predictions, KNN Performed better in {knnPerformance} predictions and both performed equally in {ties} predictions");
+            Debug.WriteLine($"Overall, {overallBetterClassifier} performed better across all the predictions.");
+
             // Reset classifiers
             Debug.WriteLine("Resetting both the Classifiers for Next Experiment...");
             htmClassifier.ClearState();
