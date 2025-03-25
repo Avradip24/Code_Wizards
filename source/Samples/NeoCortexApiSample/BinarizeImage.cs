@@ -1,7 +1,5 @@
 ﻿using Daenet.ImageBinarizerLib.Entities;
 using Daenet.ImageBinarizerLib;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 

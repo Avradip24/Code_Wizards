@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Classifiers;
-using NeoCortexApiSample;
 
 namespace NeoCortexApiSample
 {
+    /// <summary>
+    /// Implements a HTM classifier for image recognition using the NeoCortex HTM model.
+    /// </summary>
     public class HtmImageClassifier : IClassifier<Cell, string>
     {
         // Instance of HTM Classifier that maps ComputeCycle objects to string labels
-        private readonly HtmClassifier<string, ComputeCycle> _htmClassifier = new HtmClassifier<string, ComputeCycle>();
+        private readonly HtmClassifier<string, ComputeCycle> HtmClassifier = new HtmClassifier<string, ComputeCycle>();
 
         /// <summary>
         /// Trains the HTM classifier by associating a given label (key) with active cells.
@@ -20,7 +21,7 @@ namespace NeoCortexApiSample
 
         public void Learn(string key, Cell[] activeCells)
         {
-            _htmClassifier.Learn(key, activeCells);
+            HtmClassifier.Learn(key, activeCells);
         }
 
         /// <summary>
@@ -32,7 +33,7 @@ namespace NeoCortexApiSample
         public List<PredictedResult<string>> GetPredictedInputValues(Cell[] predictiveCells, int k)
         {
             // Retrieve predictions from the HTM classifier using the top-k results
-            var predictions = _htmClassifier.GetPredictedInputValues(predictiveCells, (short)k);
+            var predictions = HtmClassifier.GetPredictedInputValues(predictiveCells, (short)k);
             // Convert predictions into a structured format
             return predictions.Select(p => new PredictedResult<string>
             {
@@ -50,7 +51,7 @@ namespace NeoCortexApiSample
         /// </summary>
         public void ClearState()
         {
-            _htmClassifier.ClearState();
+            HtmClassifier.ClearState();
         }
 
         /// <summary>
