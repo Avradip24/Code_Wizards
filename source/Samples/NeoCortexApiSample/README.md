@@ -19,7 +19,7 @@ This project aims to explore the role of classifiers in Hierarchical Temporal Me
 
 ### Key Concepts:
 
-Refer to [this documents]() to read about the key concepts behind this experiment.
+Refer to [this documents](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Key%20Concepts.md) to read about the key concepts behind this experiment.
 
 ### Project Architecture:
 
@@ -27,7 +27,7 @@ Refer to [this documents]() to read about the key concepts behind this experimen
 
 ### Getting Started:
 
-Refer to [this document]() to know more about how to run the experiment.
+Refer to [this document](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Getting%20Started.md) to know more about how to run the experiment.
 
 
 ### Project Overview
@@ -38,8 +38,8 @@ The results indicate that both classifiers perform uniquely based on the test im
 
 ### Methodology
 
-There are various Methods used in the Experiment keeping in mind the concept of code reusabilty. Refere to [this document]() for code overview.
+There are various Methods used in the Experiment keeping in mind the concept of code reusabilty. Refere to [this document](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Methodology.md) for code overview.
 
 ### Results
 
-Refer to [this document]() for results and outcomes. 
+Refer to [this document](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/ProjectFindings.md) for results and outcomes. 
