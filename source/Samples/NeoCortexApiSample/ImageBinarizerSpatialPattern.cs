@@ -362,9 +362,9 @@ namespace NeoCortexApiSample
                     inputVector, bestPredictionHTM.PredictedInput);
                 Debug.WriteLine($"Similarity between HTM Reconstructed Image and Original Binarized Image using Jaccard Similarity: {jacSimilarityHTM:F2} and Hamming Distance Similarity: {hamSimilarityHTM:F2}\n");
                 double bestPredictionSimilarityHTM = Math.Round(bestPredictionHTM.Similarity / 100.0, 2);
-                //Store the Jaccard similarity value for HTM
+                //Store the Jaccard Index Similarity value for HTM
                 htmJacSimilarities.Add(jacSimilarityHTM);
-                //Store the Array similarity value for HTM
+                //Store the Hamming Distance Similarity value for HTM
                 htmHamSimilarities.Add(hamSimilarityHTM);
 
                 // Get the highest similarity prediction for KNN
@@ -377,9 +377,9 @@ namespace NeoCortexApiSample
                     inputVector, bestPredictionKNN.PredictedInput);
                 Debug.WriteLine($"Similarity between KNN Reconstructed Image and Original Binarized Image using Jaccard Similarity: {jacSimilarityKNN:F2} and Hamming Distance Similarity: {hamSimilarityKNN:F2}\n");
                 double bestPredictionSimilarityKNN = Math.Round(bestPredictionKNN.Similarity, 2);
-                // Store the Jaccard Similarity value for KNN 
+                // Store the Jaccard Index Similarity value for KNN 
                 knnJacSimilarities.Add(jacSimilarityKNN);
-                // Store the Array Similarity value for KNN 
+                // Store the Hamming Distance Similarity value for KNN 
                 knnHamSimilarities.Add(hamSimilarityKNN);
                 stopwatchReconstruction.Stop();
                 Debug.WriteLine($"Classifier Prediction and Reconstruction Time: {stopwatchReconstruction.ElapsedMilliseconds} ms");
@@ -417,7 +417,7 @@ namespace NeoCortexApiSample
                 ImageReconstructor.CompareReconstructedImages(reconstructedHTMPath, reconstructedKNNPath);
                 Debug.WriteLine("Comparison of reconstructed images completed.\n");
             }
-            // Generate the Similarity graph using the HTM & KNN Jaccard Similarity list
+            // Generate the Similarity graph using the HTM & KNN Jaccard Index Similarity list
             DrawSimilarityGraph(htmJacSimilarities, htmSimilarityFolder, "HTM Similarity Graph.png", "HTM");
             DrawSimilarityGraph(knnJacSimilarities, knnSimilarityFolder, "KNN Similarity Graph.png", "KNN");
             // Generate the Similarity Scott Plot using the HTM & KNN Hamming Distance Similarity list
