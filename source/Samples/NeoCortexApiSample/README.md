@@ -1,7 +1,7 @@
 # Project Title: ML 24/25-01 Investigate Image Reconstruction by using Classifiers
 
 ## Table of Contents
-
+- [Problem Statement](#problem-statement)
 - [Introduction](#introduction)
 - [Key Concepts](#key-concepts)
 - [Project Architecture](#project-architecture)
@@ -9,6 +9,9 @@
 - [Project Overview](#project-overview)
 - [Methodology](#methodology)
 - [Results](#results)
+### Problem Statement
+
+Image reconstruction is a fundamental challenge in artificial intelligence and machine learning, particularly when dealing with sparse representations such as Sparse Distributed Representations (SDRs). The study in this project seeks to answer key questions: How well do the HTM and KNN classifier preserve structural details during reconstruction? What are their respective strengths and weaknesses in terms of accuracy and efficiency? Addressing these questions will provide insights into their applicability in image reconstruction tasks for real-world use cases such as pattern recognition, anomaly detection, and predictive modeling.
 
 ### Introduction:
 
