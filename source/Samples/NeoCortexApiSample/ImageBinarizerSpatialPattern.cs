@@ -91,7 +91,7 @@ namespace NeoCortexApiSample
         /// <returns>
         /// A <see cref="BinarizedImagesResult"/> containing the binarized images, mappings, and related metadata.
         /// </returns>
-        public BinarizedImagesResult binarizeImage(string trainingFolder)
+        public static BinarizedImagesResult binarizeImage(string trainingFolder)
         {
             //Accessing the Image Folder form the Cureent Directory Folder
             var actualImages = Directory.EnumerateFiles(trainingFolder).Where(file => file.StartsWith($"{trainingFolder}") &&
@@ -446,7 +446,7 @@ namespace NeoCortexApiSample
         /// <param name="similarities">A list of similarity values for reconstructed images.</param>
         /// <param name="title">The title of the plot.</param>
         /// <param name="folderPath">The directory where the plot image will be saved.</param>
-        public void PlotReconstructionResults(List<double> similarities, string title, string folderPath)
+        public static void PlotReconstructionResults(List<double> similarities, string title, string folderPath)
         {
             // Define plot size
             var plt = new ScottPlot.Plot(800, 600);
