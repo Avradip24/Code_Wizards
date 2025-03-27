@@ -1,30 +1,23 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NeoCortexApi.Entities;
 using NeoCortexApi;
 using NeoCortexApiSample;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+using SkiaSharp;
 
 namespace TestNeoCortexApiSample
 {
     [TestClass]
     public class TestImageBinarizerSpatialPattern
     {
-        private ImageBinarizerSpatialPattern classifierInstance;
-        private Dictionary<string, Cell[]> sampleTrainingData;
-        private List<string> sampleBinarizedTestingImagePaths;
-        private SpatialPooler sp;
-        private int[] activeArray;
+        private Dictionary<string, Cell[]>? sampleTrainingData;
+        private List<string>? sampleBinarizedTestingImagePaths;
+        private SpatialPooler? sp;
+        private int[]? activeArray;
         private int imgHeight = 64;
         private int imgWidth = 64;
 
         [TestInitialize]
         public void Setup()
         {
-            classifierInstance = new ImageBinarizerSpatialPattern();
             sampleTrainingData = new Dictionary<string, Cell[]>
             {
                 { "image1", new Cell[] { new Cell { Index = 1 }, new Cell { Index = 2 } } },
@@ -33,6 +26,43 @@ namespace TestNeoCortexApiSample
             sampleBinarizedTestingImagePaths = new List<string> { "test1.csv", "test2.csv" };
             sp = new SpatialPooler();
             activeArray = new int[imgHeight * imgWidth];
+        }
+
+        [TestMethod]
+        public void TestBinarizeImage()
+        {
+
+            // Arrange
+            string outputDirectory = "TestBinarizedOutput";
+            string outputFileName = "test_image.png"; // Image file name
+            string testImagePath = Path.Combine(outputDirectory, outputFileName); // Full path for the image
+
+            // Ensure the output directory exists
+            if (!Directory.Exists(outputDirectory))
+                Directory.CreateDirectory(outputDirectory);
+
+            // Create a 64x64 image with a black background
+            using (var surface = SKSurface.Create(new SKImageInfo(64, 64)))
+            {
+                var canvas = surface.Canvas;
+                canvas.Clear(SKColors.Black); // Fill with black
+
+                using (var image = surface.Snapshot())
+                using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
+                using (var stream = File.OpenWrite(testImagePath))
+                {
+                    data.SaveTo(stream);
+                }
+            }
+
+            // Capture log messages using a List<string>
+            List<string> logMessages = new List<string>();
+
+            var result = ImageBinarizerSpatialPattern.binarizeImage(outputDirectory);
+
+            // Assert
+            Assert.IsNotNull(result, "Result should not be null");
+            Assert.IsNotNull(result.ActualImages, "ActualImages should not be null");
         }
 
         /// <summary>
@@ -48,7 +78,7 @@ namespace TestNeoCortexApiSample
             Directory.CreateDirectory(folderPath);
 
             // Act
-            classifierInstance.PlotReconstructionResults(similarities, title, folderPath);
+            ImageBinarizerSpatialPattern.PlotReconstructionResults(similarities, title, folderPath);
 
             // Assert
             string expectedFilePath = Path.Combine(folderPath, "Test_Similarity_Plot.png");
