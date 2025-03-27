@@ -36,6 +36,10 @@ namespace NeoCortexApiSample
             });
 
             imageBinarizer.Run();
+            // Inverting the binarized images 
+            var binaryData = File.ReadAllLines(binaryImage).Select(line => new string(line.Select(ch => ch == '0' ? '1' : '0').ToArray())).ToArray();
+            // Writing the binary data to the file
+            File.WriteAllLines(binaryImage, binaryData);
             // Returning the binary data
             return binaryImage; 
             
