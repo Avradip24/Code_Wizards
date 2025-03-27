@@ -54,5 +54,24 @@ namespace TestNeoCortexApiSample
             string expectedFilePath = Path.Combine(folderPath, "Test_Similarity_Plot.png");
             Assert.IsTrue(File.Exists(expectedFilePath), "The similarity plot should be created.");
         }
+        /// <summary>
+        /// Tests if DrawSimilarityGraph generates a combined similarity graph correctly.
+        /// </summary>
+        [TestMethod]
+        public void TestDrawSimilarityGraph()
+        {
+            // Arrange
+            List<double> similarities = new List<double> { 0.85, 0.78, 0.9 };
+            string folderPath = Path.Combine(Environment.CurrentDirectory, "TestGraphs");
+            Directory.CreateDirectory(folderPath);
+            string fileName = "TestGraph.png";
+
+            // Act
+            ImageBinarizerSpatialPattern.DrawSimilarityGraph(similarities, folderPath, fileName, "Test Graph");
+
+            // Assert
+            string expectedFilePath = Path.Combine(folderPath, fileName);
+            Assert.IsTrue(File.Exists(expectedFilePath), "The similarity graph should be generated.");
+        }
     }
 }
