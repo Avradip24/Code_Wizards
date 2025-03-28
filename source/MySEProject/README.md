@@ -1,7 +1,11 @@
 # Project Title: ML 24/25-01 Investigate Image Reconstruction by using Classifiers
 
-## Table of Contents
+# Developed in [**C#**](https://learn.microsoft.com/en-us/dotnet/csharp/), with ❤️
 
+### An experiment to showcase the prediction and reconstruction of images using Sparse Distributed Representations (SDRs) through HTM and KNN classifiers in C#
+
+## Table of Contents
+- [Problem Statement](#problem-statement)
 - [Introduction](#introduction)
 - [Key Concepts](#key-concepts)
 - [Project Architecture](#project-architecture)
@@ -9,6 +13,9 @@
 - [Project Overview](#project-overview)
 - [Methodology](#methodology)
 - [Results](#results)
+### Problem Statement
+
+Image reconstruction is a fundamental challenge in artificial intelligence and machine learning, particularly when dealing with sparse representations such as Sparse Distributed Representations (SDRs). The study in this project seeks to answer key questions: How well do the HTM and KNN classifier preserve structural details during reconstruction? What are their respective strengths and weaknesses in terms of accuracy and efficiency? Addressing these questions will provide insights into their applicability in image reconstruction tasks for real-world use cases such as pattern recognition, anomaly detection, and predictive modeling.
 
 ### Introduction:
 
@@ -16,15 +23,27 @@ This project aims to explore the role of classifiers in Hierarchical Temporal Me
 
 ### Key Concepts:
 
-Refer to [this documents]() to read about the key concepts behind this experiment.
+Refer to the [Key Concepts](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Key%20Concepts.md) document to read about the core concepts behind this experiment.
 
 ### Project Architecture:
 
 ![Overview of the Project (2)](https://github.com/user-attachments/assets/7bed04c0-6e72-47c7-819b-4f7028373367)
+|:--:| 
+| *Fig 1: Project Architecture* |
+
+This image represents a flowchart describing an image processing, classification and reconstruction pipeline. It consists of the following components:
+- **Input Image**: An initial dataset of image is provided as input.
+- **Image Binarizer**: Converts the image into a binarized format (0 & 1).
+- **HTM Spatial Pooler**: Processes the binarized image to generate a Sparse Distributed Representation (SDR).
+- **Classification & Reconstruction**:
+- *HTM Classifier*: Uses the SDR to learn and predict the image and reconstruct the predicted image.
+- *KNN Classifier*: Another classification method that also reconstructs the predicted image.
+- **Comparison 1**: The reconstructed images from both classifiers are compared with the original binarized image to evaluate their accuracy.
+- **Comparison 2**: The reconstructed images from both classifiers are compared with each other to assess differences in classification performance.
 
 ### Getting Started:
 
-Refer to [this document]() to know more about how to run the experiment.
+Refer to the [Getting Started](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Getting%20Started.md) document to know more about how to run the experiment.
 
 
 ### Project Overview
@@ -35,8 +54,8 @@ The results indicate that both classifiers perform uniquely based on the test im
 
 ### Methodology
 
-There are various Methods used in the Experiment keeping in mind the concept of code reusabilty. Refere to [this document]() for code overview.
+There are various Methods used in the Experiment keeping in mind the concept of code reusabilty. Refer to the [Methodology](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Methodology.md) for code overview.
 
 ### Results
 
-Refer to [this document]() for results and outcomes. 
+Refer to the [Project Findings](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/ProjectFindings.md) for results and outcomes. 
