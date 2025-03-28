@@ -28,6 +28,8 @@ Refer to the [Key Concepts](https://github.com/Avradip24/Code_Wizards/blob/maste
 ### Project Architecture:
 
 ![Overview of the Project (2)](https://github.com/user-attachments/assets/7bed04c0-6e72-47c7-819b-4f7028373367)
+|:--:| 
+| *Fig 1: Project Architecture* |
 
 This image represents a flowchart describing an image processing, classification and reconstruction pipeline. It consists of the following components:
 - **Input Image**: An initial dataset of image is provided as input.
