@@ -1,6 +1,7 @@
 # Project Title: ML 24/25-01 Investigate Image Reconstruction by using Classifiers
 
-### Built with ❤️ in **C#**
+# Developed in [**C#**](https://learn.microsoft.com/en-us/dotnet/csharp/), with ❤️
+
 ### An experiment to showcase the prediction and reconstruction of images using Sparse Distributed Representations (SDRs) through HTM and KNN classifiers in C#
 
 ## Table of Contents
@@ -27,6 +28,16 @@ Refer to the [Key Concepts](https://github.com/Avradip24/Code_Wizards/blob/maste
 ### Project Architecture:
 
 ![Overview of the Project (2)](https://github.com/user-attachments/assets/7bed04c0-6e72-47c7-819b-4f7028373367)
+
+This image represents a flowchart describing an image processing, classification and reconstruction pipeline. It consists of the following components:
+- **Input Image**: An initial dataset of image is provided as input.
+- **Image Binarizer**: Converts the image into a binarized format (0 & 1).
+- **HTM Spatial Pooler**: Processes the binarized image to generate a Sparse Distributed Representation (SDR).
+- **Classification & Reconstruction**:
+- *HTM Classifier*: Uses the SDR to learn and predict the image and reconstruct the predicted image.
+- *KNN Classifier*: Another classification method that also reconstructs the predicted image.
+- **Comparison 1**: The reconstructed images from both classifiers are compared with the original binarized image to evaluate their accuracy.
+- **Comparison 2**: The reconstructed images from both classifiers are compared with each other to assess differences in classification performance.
 
 ### Getting Started:
 
