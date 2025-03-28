@@ -1,5 +1,8 @@
 # Project Title: ML 24/25-01 Investigate Image Reconstruction by using Classifiers
 
+### Built with ❤️ in **C#**
+### An experiment to showcase the prediction and reconstruction of images using Sparse Distributed Representations (SDRs) through HTM and KNN classifiers in C#
+
 ## Table of Contents
 - [Problem Statement](#problem-statement)
 - [Introduction](#introduction)
@@ -19,7 +22,7 @@ This project aims to explore the role of classifiers in Hierarchical Temporal Me
 
 ### Key Concepts:
 
-Refer to [this documents](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Key%20Concepts.md) to read about the key concepts behind this experiment.
+Refer to the [Key Concepts](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Key%20Concepts.md) document to read about the core concepts behind this experiment.
 
 ### Project Architecture:
 
@@ -27,7 +30,7 @@ Refer to [this documents](https://github.com/Avradip24/Code_Wizards/blob/master/
 
 ### Getting Started:
 
-Refer to [this document](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Getting%20Started.md) to know more about how to run the experiment.
+Refer to the [Getting Started](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Getting%20Started.md) document to know more about how to run the experiment.
 
 
 ### Project Overview
@@ -38,8 +41,8 @@ The results indicate that both classifiers perform uniquely based on the test im
 
 ### Methodology
 
-There are various Methods used in the Experiment keeping in mind the concept of code reusabilty. Refere to [this document](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Methodology.md) for code overview.
+There are various Methods used in the Experiment keeping in mind the concept of code reusabilty. Refer to the [Methodology](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Methodology.md) for code overview.
 
 ### Results
 
-Refer to [this document](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/ProjectFindings.md) for results and outcomes. 
+Refer to the [Project Findings](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/ProjectFindings.md) for results and outcomes. 
