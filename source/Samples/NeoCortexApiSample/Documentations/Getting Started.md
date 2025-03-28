@@ -19,9 +19,13 @@
 - Code_Wizards\source\Samples\NeoCortexApiSample\bin\Debug\net9.0\ReconstructedKNN
 
 ### Project Directory Structure:
-
+On cloning the repository, the below directory structure is followed : 
 ![Project Directory](https://github.com/user-attachments/assets/9be20ccf-d9fb-4b23-9f3d-1feef3f441f4)
+|:--:| 
+| Fig 1: Project Directory Structure |
 
 ### Unit Tests Directory Structure:
 
 ![Directory 2](https://github.com/user-attachments/assets/b5ce3034-f655-4df6-a7a6-ddffebc93cb8)
+|:--:| 
+| Fig 2: Unit Tests Directory Structure |
