@@ -5,6 +5,11 @@ using SkiaSharp;
 
 namespace TestNeoCortexApiSample
 {
+    /// <summary>
+    /// Unit tests for the <see cref="ImageBinarizerSpatialPattern"/> class.
+    /// This class tests various functionalities including image binarization,
+    /// similarity graph generation.
+    /// </summary>
     [TestClass]
     public class TestImageBinarizerSpatialPattern
     {
@@ -15,6 +20,10 @@ namespace TestNeoCortexApiSample
         private int imgHeight = 64;
         private int imgWidth = 64;
 
+        /// <summary>
+        /// Initializes the test setup with sample training data,
+        /// binarized test image paths
+        /// </summary>
         [TestInitialize]
         public void Setup()
         {
@@ -28,6 +37,10 @@ namespace TestNeoCortexApiSample
             activeArray = new int[imgHeight * imgWidth];
         }
 
+        /// <summary>
+        /// Tests the image binarization process.
+        /// Verifies that the binarized image result is generated correctly.
+        /// </summary>
         [TestMethod]
         public void TestBinarizeImage()
         {
