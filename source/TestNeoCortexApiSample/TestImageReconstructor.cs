@@ -4,12 +4,20 @@ using NeoCortexApiSample;
 
 namespace TestNeoCortexApiSample;
 
+/// <summary>
+/// Unit tests for the ImageReconstructor class, verifying image reconstruction 
+/// and similarity comparison functionalities.
+/// </summary>
 [TestClass]
 public class TestImageReconstructor
 {
     private int imgWidth = 64;
     private int imgHeight = 64;
 
+    /// <summary>
+    /// Tests the image reconstruction and ensures the output file is created correctly.
+    /// Verifies that the Jaccard Index and Hamming Distance similarity measures fall within valid ranges.
+    /// </summary>
     [TestMethod]
     public void TestReconstructAndSave()
     {
@@ -117,6 +125,10 @@ public class TestImageReconstructor
             Directory.Delete(testBinarizedFolder, true);
     }
 
+    /// <summary>
+    /// Compares two reconstructed images (HTM vs KNN) and verifies similarity calculation.
+    /// Logs the similarity result and ensures the log message format is correct.
+    /// </summary>
     [TestMethod]
     public void CompareReconstructedImages()
     {

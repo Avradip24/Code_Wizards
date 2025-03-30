@@ -44,7 +44,9 @@ namespace NeoCortexApiSample
             }).ToList();
         }
 
-        // Clears the stored learned data in the classifier
+        /// <summary>
+        /// Clears the stored learned data in the classifier
+        /// </summary>
         public void ClearState()
         {
             KnnClassifier.ClearState();

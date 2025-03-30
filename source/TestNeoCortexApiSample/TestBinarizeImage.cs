@@ -3,6 +3,10 @@ using SkiaSharp;
 
 namespace TestNeoCortexApiSample
 {
+    /// <summary>
+    /// Unit tests for the image binarization functionality in the ImageBinarizationUtils class.
+    /// Ensures images are properly binarized and saved to the expected location.
+    /// </summary>
     [TestClass]
     public sealed class TestBinarizeImage
     {
@@ -10,6 +14,10 @@ namespace TestNeoCortexApiSample
         private readonly string outputDirectory = "TestBinarizedOutput";
         private readonly string outputFileName = "BinarizedTestImage";
 
+        /// <summary>
+        /// Initializes the test environment by creating a 64x64 black image.
+        /// Ensures that the output directory exists before each test run.
+        /// </summary>
         [TestInitialize]
         public void Setup()
         {
@@ -32,6 +40,10 @@ namespace TestNeoCortexApiSample
             }
         }
 
+        /// <summary>
+        /// Tests the image binarization process.
+        /// Verifies that the binarized image file is created with the expected filename.
+        /// </summary>
         [TestMethod]
         public void TestBinarizeImages()
         {
@@ -48,6 +60,10 @@ namespace TestNeoCortexApiSample
             Assert.AreEqual(outputFileName, binarizedImage);
         }
 
+        /// <summary>
+        /// Cleans up test artifacts by deleting the test image and output directory after execution.
+        /// Ensures that temporary test files do not persist between test runs.
+        /// </summary>
         [TestCleanup]
         public void Cleanup()
         {
