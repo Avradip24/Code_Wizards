@@ -1,4 +1,4 @@
-# Project Title: ML 24/25-01 Investigate Image Reconstruction by using Classifiers
+# Investigate Image Reconstruction by using Classifiers
 
 # Developed in [**C#**](https://learn.microsoft.com/en-us/dotnet/csharp/), with ❤️
 
