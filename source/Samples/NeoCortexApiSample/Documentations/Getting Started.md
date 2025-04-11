@@ -5,7 +5,7 @@
 - Checkout to the master branch
 - The main project files can be found in [Project Files](https://github.com/Avradip24/Code_Wizards/tree/master/source/Samples/NeoCortexApiSample)
 - Run the "dotnet restore" command in command prompt.
-- The project requires input images to perform the experiment. Few input images should be placed inside the file - "Code_Wizards\source\Samples\NeoCortexApiSample\bin\Debug\net9.0\Sample\TestFiles". You can find the input images we used inside [Input Images Dataset](https://github.com/Avradip24/Code_Wizards/tree/master/source/Samples/NeoCortexApiSample/Documentations/Input%20Images%20Dataset)
+- The project requires input images to perform the experiment. Few input images should be placed inside the file - "Code_Wizards\source\Samples\NeoCortexApiSample\bin\Debug\net9.0\TestFiles". You can find the input images we used inside [TestFiles](https://github.com/Avradip24/Code_Wizards/tree/master/source/Samples/NeoCortexApiSample/TestFiles)
 - Set the starting point of the project as NeoCortexApiSample
   
 ![Project Starting Point](https://github.com/user-attachments/assets/38dcab40-c09a-4703-b543-d4e6130c617e)
