@@ -13,7 +13,7 @@ namespace NeoCortexApiSample
     public class ImageBinarizerSpatialPattern
     {
         //Accessing the Image Folder form the Cureent Directory
-        string trainingFolder = "Sample\\TestFiles";
+        string trainingFolder = "TestFiles";
         // Classifier instance for HTM 
         private IClassifier<Cell, string> htmClassifier;
         // Classifier instance for KNN 
