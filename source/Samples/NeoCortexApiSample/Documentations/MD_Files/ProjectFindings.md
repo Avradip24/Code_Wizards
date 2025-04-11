@@ -18,7 +18,7 @@ After Binarization this image represents the binarized version of the input imag
 #### Stable SDRs:
 The Spatial Pooler reached stable state after iterating 62 cycles.
 
-| ![WhatsApp Image 2025-03-28 at 20 29 46](https://github.com/user-attachments/assets/219b1c28-826c-41e3-aedb-1f1acdaad9cd)
+| ![Stable sdr](https://github.com/user-attachments/assets/ba973bf8-140a-4e48-a4da-f58037040221)
 |:--:| 
 | *Fig 3: Stable SDRs generated after 62 cycles* |
 
@@ -32,21 +32,21 @@ Image reconstructed by the classifiers.
 #### CASE 1: 
 HTM Classifiers performed better via predicting the Image with higher similarity. Also the classifier Prediction and Reconstruction time is being captured and the similarity between both the reconstructed images are presented. 
  
-| ![WhatsApp Image 2025-03-27 at 20 33 37_05364955](https://github.com/user-attachments/assets/0dbd0a53-4581-43fb-a751-a431f5b16566)
+| ![Figure 1](https://github.com/user-attachments/assets/7704b32b-8307-4c26-b636-801591ca62d6)
 |:--:| 
 | *Fig 5: Case where both the classifiers predicted different images* |
 
  #### CASE 2: 
  This is scenario where both the HTM and KNN Classifiers predicted the same image. So we can say that here both the classifiers performed equally.
  
-| ![WhatsApp Image 2025-03-27 at 20 33 25_b0360ad8](https://github.com/user-attachments/assets/0d0e98ed-e09e-43ba-9871-15568fa2c5d4)
+| ![Ssme image](https://github.com/user-attachments/assets/f3cf45ca-cd17-4b7b-9892-b8e3e9c3ac3d)
 |:--:| 
 | *Fig 6: Case where both the classifiers predicted same image* |
 
  #### Classifier Performance :
  Overall for all the predictions and reconstructions we calculated which classifier performed better. Here we can see that HTM Classifier outperformed KNN Classifier.
 
-|![WhatsApp Image 2025-03-27 at 20 34 03_cafabdf8](https://github.com/user-attachments/assets/b50012ab-8a4e-4569-8bf0-acc30f162324)
+| ![Outperforming ](https://github.com/user-attachments/assets/c65cc038-3562-4e7d-81cf-ed58d83c1e48)
 |:--:| 
 | *Fig 7: HTM Classifier outperformed KNN Classifier* |
  
