@@ -7,7 +7,7 @@
 - Run the "dotnet restore" command in command prompt.
 - The project requires input images to perform the experiment. Few input images should be placed inside the file - "Code_Wizards\source\Samples\NeoCortexApiSample\bin\Debug\net9.0\TestFiles". You can find the input images we used inside [TestFiles](https://github.com/Avradip24/Code_Wizards/tree/master/source/Samples/NeoCortexApiSample/TestFiles)
 - Set the starting point of the project as NeoCortexApiSample
-  
+
 ![Project Starting Point](https://github.com/user-attachments/assets/38dcab40-c09a-4703-b543-d4e6130c617e)
 |:--:| 
 | Fig 1: Set StartUp Project |
@@ -26,7 +26,7 @@
 
 ### Project Directory Structure:
 On cloning the repository, the below directory structure is followed : 
-![Project Directory](https://github.com/user-attachments/assets/9be20ccf-d9fb-4b23-9f3d-1feef3f441f4)
+![Project Directory](https://github.com/user-attachments/assets/7f6aeb0f-53fd-45c8-9b9a-8c00b8cdd8d9)
 |:--:| 
 | Fig 2: Project Directory Structure |
 
