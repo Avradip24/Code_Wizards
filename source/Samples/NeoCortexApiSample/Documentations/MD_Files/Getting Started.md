@@ -26,12 +26,12 @@
 
 ### Project Directory Structure:
 On cloning the repository, the below directory structure is followed : 
-![Project Directory](https://github.com/user-attachments/assets/7f6aeb0f-53fd-45c8-9b9a-8c00b8cdd8d9)
+![Project Directory](https://github.com/user-attachments/assets/b17d2eb3-d987-4588-9f49-b783b5080977)
 |:--:| 
 | Fig 2: Project Directory Structure |
 
 ### Unit Tests Directory Structure:
 This is the directory structure for Unit Tests :
-![Directory 2](https://github.com/user-attachments/assets/b5ce3034-f655-4df6-a7a6-ddffebc93cb8)
+![Directory 2](https://github.com/user-attachments/assets/74bbcff0-826e-4b7a-b80a-aa004333ce8c)
 |:--:| 
 | Fig 3: Unit Tests Directory Structure |
