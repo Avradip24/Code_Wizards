@@ -14,7 +14,38 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Documentations\TestFiles\**" />
+    <EmbeddedResource Remove="Documentations\TestFiles\**" />
+    <None Remove="Documentations\TestFiles\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="Program1.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="TestFiles\Image 1.png" />
+    <None Remove="TestFiles\Image 10.png" />
+    <None Remove="TestFiles\Image 2.png" />
+    <None Remove="TestFiles\Image 20.png" />
+    <None Remove="TestFiles\Image 3.png" />
+    <None Remove="TestFiles\Image 30.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TestFiles\Image 1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Image 10.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Image 2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Image 20.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFiles\Image 3.png" />
+    <Content Include="TestFiles\Image 30.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="OfficeOpenXml.Core.ExcelPackage" Version="1.0.0" />
