@@ -23,7 +23,7 @@ This project aims to explore the role of classifiers in Hierarchical Temporal Me
 
 ### Key Concepts:
 
-Refer to the [Key Concepts](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Key%20Concepts.md) document to read about the core concepts behind this experiment.
+Refer to the [Key Concepts](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/MD_Files/Key%20Concepts.md) document to read about the core concepts behind this experiment.
 
 ### Project Architecture:
 
@@ -43,7 +43,7 @@ This image represents a flowchart describing an image processing, classification
 
 ### Getting Started:
 
-Refer to the [Getting Started](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Getting%20Started.md) document to know more about how to run the experiment.
+Refer to the [Getting Started](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/MD_Files/Getting%20Started.md) document to know more about how to run the experiment.
 
 
 ### Project Overview
@@ -54,8 +54,8 @@ The results indicate that both classifiers perform uniquely based on the test im
 
 ### Methodology
 
-There are various Methods used in the Experiment keeping in mind the concept of code reusabilty. Refer to the [Methodology](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/Methodology.md) for code overview.
+There are various Methods used in the Experiment keeping in mind the concept of code reusabilty. Refer to the [Methodology](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/MD_Files/Methodology.md) for code overview.
 
 ### Results
 
-Refer to the [Project Findings](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/ProjectFindings.md) for results and outcomes. 
+Refer to the [Project Findings](https://github.com/Avradip24/Code_Wizards/blob/master/source/Samples/NeoCortexApiSample/Documentations/MD_Files/ProjectFindings.md) for results and outcomes. 
