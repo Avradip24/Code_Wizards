@@ -49,26 +49,30 @@ HTM Classifiers performed better via predicting the Image with higher similarity
 | ![Outperforming ](https://github.com/user-attachments/assets/c65cc038-3562-4e7d-81cf-ed58d83c1e48)
 |:--:| 
 | *Fig 7: HTM Classifier outperformed KNN Classifier* |
+
+![Visualisation of Classifier Performance](https://github.com/user-attachments/assets/acf75a1d-11bc-4729-814e-04c57b78a8a2)
+|:--:| 
+| *Fig 8: Visualisation of Classifier Performance* |
  
- For both the classifiers all the predicted images are reconstructed and the similarity of the Reconstructed Images with the Original Binarized Images are calculated. These similarities are taken into account via two methods - Jaccard Index Similarity (The JaccardSimilarityofBinaryArrays method calculates the similarity between two binary arrays by dividing the count of shared 1s (intersection) by the count of total 1s present in either array (union), producing a value between 0 and 1 to measure their resemblance) and Hamming Distance Similarity (The GetHammingDistance method calculates the similarity between two binary matrices by counting differing bits for each row, optionally considering only nonzero bits, and computes the percentage similarity based on the total bit count, returning an array of similarity scores). The Jaccard Index Similarities are visualized in BarGraph, similarly the Hamming Distance Similarities are visualized in ScottPlot. 
+For both the classifiers all the predicted images are reconstructed and the similarity of the Reconstructed Images with the Original Binarized Images are calculated. These similarities are taken into account via two methods - Jaccard Index Similarity (The JaccardSimilarityofBinaryArrays method calculates the similarity between two binary arrays by dividing the count of shared 1s (intersection) by the count of total 1s present in either array (union), producing a value between 0 and 1 to measure their resemblance) and Hamming Distance Similarity (The GetHammingDistance method calculates the similarity between two binary matrices by counting differing bits for each row, optionally considering only nonzero bits, and computes the percentage similarity based on the total bit count, returning an array of similarity scores). The Jaccard Index Similarities are visualized in BarGraph, similarly the Hamming Distance Similarities are visualized in ScottPlot. 
  
  #### Visualizations For HTM:
  
 | ![WhatsApp Image 2025-03-27 at 20 35 41_3fde3a7a](https://github.com/user-attachments/assets/229c5d92-38d3-4ec4-9e92-850cd6633239)
 |:--:| 
-| *Fig 8: BarGraph illustrating Jaccard Similarity of the HTM Reconstructed Images with the Original Binarized Images* |
+| *Fig 9: BarGraph illustrating Jaccard Similarity of the HTM Reconstructed Images with the Original Binarized Images* |
 
 | ![WhatsApp Image 2025-03-27 at 20 36 06_4bd76e78](https://github.com/user-attachments/assets/d72306ec-57fa-4d08-b6ae-09b855bc1649)
 |:--:| 
-| *Fig 9: Scott Plot illustrating Hamming Distance Similarity of the HTM Reconstructed Images with the Original Binarized Images* |
+| *Fig 10: Scott Plot illustrating Hamming Distance Similarity of the HTM Reconstructed Images with the Original Binarized Images* |
  
  #### Visualizations For KNN:
  
 | ![WhatsApp Image 2025-03-27 at 20 36 38_c44a1394](https://github.com/user-attachments/assets/634af39f-ea73-4eae-9c89-7dbd0c090241)
 |:--:| 
-| *Fig 10: BarGraph illustrating Jaccard Similarity of the KNN Reconstructed Images with the Original Binarized Images* |
+| *Fig 11: BarGraph illustrating Jaccard Similarity of the KNN Reconstructed Images with the Original Binarized Images* |
 
 | ![WhatsApp Image 2025-03-27 at 20 36 53_68044109](https://github.com/user-attachments/assets/3ef1c35f-6ca3-4946-99c9-74bc71425c19)
 |:--:| 
-| *Fig 11: Scott Plot illustrating Hamming Distance Similarity of the KNN Reconstructed Images with the Original Binarized Images* |
+| *Fig 12: Scott Plot illustrating Hamming Distance Similarity of the KNN Reconstructed Images with the Original Binarized Images* |
 
