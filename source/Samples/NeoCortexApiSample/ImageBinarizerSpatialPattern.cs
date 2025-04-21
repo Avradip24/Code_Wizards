@@ -417,6 +417,26 @@ namespace NeoCortexApiSample
                 ImageReconstructor.CompareReconstructedImages(reconstructedHTMPath, reconstructedKNNPath);
                 Debug.WriteLine("Comparison of reconstructed images completed.\n");
             }
+            // Plotting overall performance comparison
+            var plt = new ScottPlot.Plot(600, 400);
+
+            // Categories: HTM, KNN, Tie
+            string[] classifierLabels = { "HTM", "KNN", "Equal Performance" };
+            double[] performanceCounts = { htmPerformance, knnPerformance, ties };
+
+            // Draw bar plot
+            plt.AddBar(performanceCounts);
+            plt.XTicks(classifierLabels);
+            plt.Title("Classifier Performance Comparison");
+            plt.YLabel("Number of Test Images Won");
+
+            // Save the bar graph
+            string performanceGraphPath = Path.Combine("ClassifierComparison", "Classifier_Performance_BarGraph.png");
+            Directory.CreateDirectory("ClassifierComparison");
+            plt.SaveFig(performanceGraphPath);
+
+            Debug.WriteLine($"Classifier performance comparison graph saved at: {performanceGraphPath}");
+
             // Generate the Similarity graph using the HTM & KNN Jaccard Index Similarity list
             DrawSimilarityGraph(htmJacSimilarities, htmSimilarityFolder, "HTM Similarity Graph.png", "HTM");
             DrawSimilarityGraph(knnJacSimilarities, knnSimilarityFolder, "KNN Similarity Graph.png", "KNN");
